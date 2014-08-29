@@ -1,11 +1,15 @@
 <html>
   <head>
     <title>Leaflet.buffer demo</title>
+    <!-- leaflet -->
     <script src="lib/leaflet-src.js"></script>
-    <script src="leaflet.draw.js"></script>
-
     <link rel="stylesheet" href="lib/leaflet.css">
-    <link rel="stylesheet" href="leaflet.draw.css">
+    <!-- leaflet.draw -->
+    <script src="lib/leaflet.draw-src.js"></script>
+    <link rel="stylesheet" href="lib/leaflet.draw.css">
+    <!--leaflet.buffer-->
+    <script src="../src/Leaflet.buffer.js"></script>
+    <link rel="stylesheet" href="../src/leaflet.buffer.css">
   </head>
   <body>
     <div id="map" style="width: 800px; height: 600px; border: 1px solid #ccc"></div>
@@ -46,7 +50,8 @@
         },
         edit: {
           featureGroup: drawnItems,
-          remove: true
+          remove: true,
+          buffer: {}
         }
       });
       map.addControl(drawControl);
@@ -61,21 +66,6 @@
 
         drawnItems.addLayer(layer);
       });
-
-      /*
-      map.on('draw:edited', function (e) {
-        var layers = e.layers;
-        var countOfEditedLayers = 0;
-        layers.eachLayer(function(layer) {
-          countOfEditedLayers++;
-        });
-        console.log("Edited " + countOfEditedLayers + " layers");
-      });
-
-      L.DomUtil.get('changeColor').onclick = function () {
-        drawControl.setDrawingOptions({ rectangle: { shapeOptions: { color: '#004a80' } } });
-      };
-      */
     </script>
   </body>
 </html>
