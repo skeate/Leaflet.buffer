@@ -48,22 +48,22 @@ L.EditToolbar.Buffer = L.Handler.extend({
 		this.fire('enabled', {handler: this.type});
 			//this disable other handlers
 
-		this._map.fire('draw:editstart', { handler: this.type });
+		this._map.fire('draw:bufferstart', { handler: this.type });
 			//allow drawLayer to be updated before beginning edition.
 
 		L.Handler.prototype.enable.call(this);
 		this._featureGroup
-			.on('layeradd', this._enableLayerEdit, this)
-			.on('layerremove', this._disableLayerEdit, this);
+			.on('layeradd', this._enableLayerBuffer, this)
+			.on('layerremove', this._disableLayerBuffer, this);
 	},
 
 	disable: function () {
 		if (!this._enabled) { return; }
 		this._featureGroup
-			.off('layeradd', this._enableLayerEdit, this)
-			.off('layerremove', this._disableLayerEdit, this);
+			.off('layeradd', this._enableLayerBuffer, this)
+			.off('layerremove', this._disableLayerBuffer, this);
 		L.Handler.prototype.disable.call(this);
-		this._map.fire('draw:editstop', { handler: this.type });
+		this._map.fire('draw:bufferstop', { handler: this.type });
 		this.fire('disabled', {handler: this.type});
 	},
 
@@ -73,12 +73,11 @@ L.EditToolbar.Buffer = L.Handler.extend({
 		if (map) {
 			map.getContainer().focus();
 
-			this._featureGroup.eachLayer(this._enableLayerEdit, this);
+			this._featureGroup.eachLayer(this._enableLayerBuffer, this);
 
 			this._tooltip = new L.Tooltip(this._map);
 			this._tooltip.updateContent({
-				text: L.drawLocal.edit.handlers.edit.tooltip.text,
-				subtext: L.drawLocal.edit.handlers.edit.tooltip.subtext
+				text: L.drawLocal.edit.handlers.buffer.tooltip.text
 			});
 
 			this._map.on('mousemove', this._onMouseMove, this);
@@ -88,7 +87,7 @@ L.EditToolbar.Buffer = L.Handler.extend({
 	removeHooks: function () {
 		if (this._map) {
 			// Clean up selected layers.
-			this._featureGroup.eachLayer(this._disableLayerEdit, this);
+			this._featureGroup.eachLayer(this._disableLayerBuffer, this);
 
 			// Clear the backups of the original layers
 			this._uneditedLayerProps = {};
@@ -107,32 +106,32 @@ L.EditToolbar.Buffer = L.Handler.extend({
 	},
 
 	save: function () {
-		var editedLayers = new L.LayerGroup();
+		var bufferedLayers = new L.LayerGroup();
 		this._featureGroup.eachLayer(function (layer) {
-			if (layer.edited) {
-				editedLayers.addLayer(layer);
-				layer.edited = false;
+			if (layer.buffered) {
+				bufferedLayers.addLayer(layer);
+				layer.buffered = false;
 			}
 		});
-		this._map.fire('draw:edited', {layers: editedLayers});
+		this._map.fire('draw:buffered', {layers: editedLayers});
 	},
 
 	_backupLayer: function (layer) {
 		var id = L.Util.stamp(layer);
 
-		if (!this._uneditedLayerProps[id]) {
+		if (!this._unbufferedLayerProps[id]) {
 			// Polyline, Polygon or Rectangle
 			if (layer instanceof L.Polyline || layer instanceof L.Polygon || layer instanceof L.Rectangle) {
-				this._uneditedLayerProps[id] = {
+				this._unbufferedLayerProps[id] = {
 					latlngs: L.LatLngUtil.cloneLatLngs(layer.getLatLngs())
 				};
 			} else if (layer instanceof L.Circle) {
-				this._uneditedLayerProps[id] = {
+				this._unbufferedLayerProps[id] = {
 					latlng: L.LatLngUtil.cloneLatLng(layer.getLatLng()),
 					radius: layer.getRadius()
 				};
 			} else if (layer instanceof L.Marker) { // Marker
-				this._uneditedLayerProps[id] = {
+				this._unbufferedLayerProps[id] = {
 					latlng: L.LatLngUtil.cloneLatLng(layer.getLatLng())
 				};
 			}
@@ -141,16 +140,16 @@ L.EditToolbar.Buffer = L.Handler.extend({
 
 	_revertLayer: function (layer) {
 		var id = L.Util.stamp(layer);
-		layer.edited = false;
+		layer.buffered = false;
 		if (this._uneditedLayerProps.hasOwnProperty(id)) {
 			// Polyline, Polygon or Rectangle
 			if (layer instanceof L.Polyline || layer instanceof L.Polygon || layer instanceof L.Rectangle) {
-				layer.setLatLngs(this._uneditedLayerProps[id].latlngs);
+				layer.setLatLngs(this._unbufferedLayerProps[id].latlngs);
 			} else if (layer instanceof L.Circle) {
-				layer.setLatLng(this._uneditedLayerProps[id].latlng);
-				layer.setRadius(this._uneditedLayerProps[id].radius);
+				layer.setLatLng(this._unbufferedLayerProps[id].latlng);
+				layer.setRadius(this._unbufferedLayerProps[id].radius);
 			} else if (layer instanceof L.Marker) { // Marker
-				layer.setLatLng(this._uneditedLayerProps[id].latlng);
+				layer.setLatLng(this._unbufferedLayerProps[id].latlng);
 			}
 		}
 	},
@@ -186,7 +185,7 @@ L.EditToolbar.Buffer = L.Handler.extend({
 		icon.style.marginLeft = iconMarginLeft + 'px';
 	},
 
-	_enableLayerEdit: function (e) {
+	_enableLayerBuffer: function (e) {
 		var layer = e.layer || e.target || e,
 			isMarker = layer instanceof L.Marker,
 			pathOptions;
@@ -233,7 +232,7 @@ L.EditToolbar.Buffer = L.Handler.extend({
 		}
 	},
 
-	_disableLayerEdit: function (e) {
+	_disableLayerBuffer: function (e) {
 		var layer = e.layer || e.target || e;
 		layer.edited = false;
 
