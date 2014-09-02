@@ -208,20 +208,23 @@ L.EditToolbar.Buffer = L.Handler.extend({
     //debugger;
     this._map.on('mousemove', this._onLayerDrag, this);
     this._draggingLayer = e.layer || e.target || e;
+    //debugger;
     this._originalGeoJSON = this._draggingLayer.toGeoJSON();
     this._originalLatLng = e.latlng;
   },
 
   _onLayerDrag: function(e){
-    //console.log('dragging in progress');
     var distance = cartesian_distance( e.latlng, this._originalLatLng );
-    //console.log(distance + ' pixels from start');
-    //var geoJSON = this._draggingLayer.toGeoJSON();
     // based on Daniel Kempkens' code @ https://coderwall.com/p/zb_zdw
     var geoReader = new jsts.io.GeoJSONReader(),
         geoWriter = new jsts.io.GeoJSONWriter();
     var geometry = geoReader.read(this._originalGeoJSON).geometry.buffer(distance);
     this._draggingLayer.setLatLngs(geoWriter.write(geometry).coordinates[0].map(geoJsonToLatLng));
+    if( this._draggingLayer instanceof L.Polyline ){
+      this._draggingLayer.__proto__ = L.Polygon.prototype;
+      this._draggingLayer.options.fill = true;
+      this._draggingLayer.setStyle('fill', true);
+    }
   },
   
   _onLayerDragEnd: function(e){
