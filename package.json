@@ -22,6 +22,7 @@
   },
   "homepage": "https://github.com/skeate/Leaflet.buffer",
   "dependencies": {
+    "jsts": "^0.14.0",
     "leaflet": "^0.7.3"
   }
 }

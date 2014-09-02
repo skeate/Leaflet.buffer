@@ -1,5 +1,31 @@
 L.bufferVersion = '0.0.1-dev';
 
+function geoJsonToLatLng(geoJson){
+  return L.latLng(geoJson[1], geoJson[0]);
+}
+
+function haversine_distance(latLng1, latLng2){
+  var haversin = function(theta){
+    return Math.sin(theta/2) * Math.sin(theta/2);
+  };
+  var R = 6.371; // Mm
+  var lat1 = latLng1.lat * 180 / Math.PI;
+  var lat2 = latLng2.lat * 180 / Math.PI;
+  var lng1 = latLng1.lng * 180 / Math.PI;
+  var lng2 = latLng2.lng * 180 / Math.PI;
+  var d_lat = lat2 - lat1;
+  var d_lng = lng2 - lng1;
+  var a = haversin(d_lat/2) * Math.cos(lat1) * Math.cos(lat2) * haversin(d_lng/2);
+  var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  return R * c;
+}
+
+function cartesian_distance(latLng1, latLng2){
+  var d_lat = latLng2.lat - latLng1.lat;
+  var d_lng = latLng2.lng - latLng1.lng;
+  return Math.sqrt(d_lat * d_lat + d_lng * d_lng);
+}
+
 L.drawLocal.edit.toolbar.buttons.buffer = 'Expand layers.';
 L.drawLocal.edit.toolbar.buttons.bufferDisabled = 'No layers to expand.';
 L.drawLocal.edit.handlers.buffer = { tooltip: { text: 'Click and drag to expand or contract a shape.' } };
@@ -22,6 +48,8 @@ L.EditToolbar.Buffer = L.Handler.extend({
 
 	includes: L.Mixin.Events,
 
+  _draggingLayer: null,
+
 	initialize: function (map, options) {
 		L.Handler.prototype.initialize.call(this, map);
 
@@ -35,7 +63,7 @@ L.EditToolbar.Buffer = L.Handler.extend({
 			throw new Error('options.featureGroup must be a L.FeatureGroup');
 		}
 
-		this._uneditedLayerProps = {};
+		this._unbufferedLayerProps = {};
 
 		// Save the type so super can fire, need to do this as cannot do this.TYPE :(
 		this.type = L.EditToolbar.Buffer.TYPE;
@@ -76,9 +104,7 @@ L.EditToolbar.Buffer = L.Handler.extend({
 			this._featureGroup.eachLayer(this._enableLayerBuffer, this);
 
 			this._tooltip = new L.Tooltip(this._map);
-			this._tooltip.updateContent({
-				text: L.drawLocal.edit.handlers.buffer.tooltip.text
-			});
+			this._tooltip.updateContent({ text: L.drawLocal.edit.handlers.buffer.tooltip.text });
 
 			this._map.on('mousemove', this._onMouseMove, this);
 		}
@@ -90,7 +116,7 @@ L.EditToolbar.Buffer = L.Handler.extend({
 			this._featureGroup.eachLayer(this._disableLayerBuffer, this);
 
 			// Clear the backups of the original layers
-			this._uneditedLayerProps = {};
+			this._unbufferedLayerProps = {};
 
 			this._tooltip.dispose();
 			this._tooltip = null;
@@ -141,7 +167,7 @@ L.EditToolbar.Buffer = L.Handler.extend({
 	_revertLayer: function (layer) {
 		var id = L.Util.stamp(layer);
 		layer.buffered = false;
-		if (this._uneditedLayerProps.hasOwnProperty(id)) {
+		if (this._unbufferedLayerProps.hasOwnProperty(id)) {
 			// Polyline, Polygon or Rectangle
 			if (layer instanceof L.Polyline || layer instanceof L.Polygon || layer instanceof L.Rectangle) {
 				layer.setLatLngs(this._unbufferedLayerProps[id].latlngs);
@@ -154,107 +180,56 @@ L.EditToolbar.Buffer = L.Handler.extend({
 		}
 	},
 
-	_toggleMarkerHighlight: function (marker) {
-		if (!marker._icon) {
-			return;
-		}
-		// This is quite naughty, but I don't see another way of doing it. (short of setting a new icon)
-		var icon = marker._icon;
-
-		icon.style.display = 'none';
-
-		if (L.DomUtil.hasClass(icon, 'leaflet-buffer-marker-selected')) {
-			L.DomUtil.removeClass(icon, 'leaflet-buffer-marker-selected');
-			// Offset as the border will make the icon move.
-			this._offsetMarker(icon, -4);
-
-		} else {
-			L.DomUtil.addClass(icon, 'leaflet-buffer-marker-selected');
-			// Offset as the border will make the icon move.
-			this._offsetMarker(icon, 4);
-		}
-
-		icon.style.display = '';
-	},
-
-	_offsetMarker: function (icon, offset) {
-		var iconMarginTop = parseInt(icon.style.marginTop, 10) - offset,
-			iconMarginLeft = parseInt(icon.style.marginLeft, 10) - offset;
-
-		icon.style.marginTop = iconMarginTop + 'px';
-		icon.style.marginLeft = iconMarginLeft + 'px';
-	},
-
 	_enableLayerBuffer: function (e) {
 		var layer = e.layer || e.target || e,
-			isMarker = layer instanceof L.Marker,
-			pathOptions;
+			isMarker = layer instanceof L.Marker;
 
-		// Don't do anything if this layer is a marker but doesn't have an icon. Markers
-		// should usually have icons. If using Leaflet.draw with Leafler.markercluster there
-		// is a chance that a marker doesn't.
-		if (isMarker && !layer._icon) {
-			return;
-		}
-
-		// Back up this layer (if haven't before)
-		this._backupLayer(layer);
-
-		// Update layer style so appears editable
-		if (this._selectedPathOptions) {
-			pathOptions = L.Util.extend({}, this._selectedPathOptions);
-
-			// Use the existing color of the layer
-			if (pathOptions.maintainColor) {
-				pathOptions.color = layer.options.color;
-				pathOptions.fillColor = layer.options.fillColor;
-			}
-
-			if (isMarker) {
-				this._toggleMarkerHighlight(layer);
-			} else {
-				layer.options.previousOptions = L.Util.extend({ dashArray: null }, layer.options);
-
-				// Make sure that Polylines are not filled
-				if (!(layer instanceof L.Circle) && !(layer instanceof L.Polygon) && !(layer instanceof L.Rectangle)) {
-					pathOptions.fill = false;
-				}
-
-				layer.setStyle(pathOptions);
-			}
-		}
-
-		if (isMarker) {
-			layer.dragging.enable();
-			layer.on('dragend', this._onMarkerDragEnd);
-		} else {
-			layer.editing.enable();
-		}
+    if( !isMarker ){
+      // Back up this layer (if haven't before)
+      this._backupLayer(layer);
+      layer.on('mousedown', this._onLayerDragStart, this);
+      //layer.on('click', this._onLayerDragEnd, this);
+      this._map.on('mouseup', this._onLayerDragEnd, this);
+    }
 	},
 
 	_disableLayerBuffer: function (e) {
 		var layer = e.layer || e.target || e;
 		layer.edited = false;
 
-		// Reset layer styles to that of before select
-		if (this._selectedPathOptions) {
-			if (layer instanceof L.Marker) {
-				this._toggleMarkerHighlight(layer);
-			} else {
-				// reset the layer style to what is was before being selected
-				layer.setStyle(layer.options.previousOptions);
-				// remove the cached options for the layer object
-				delete layer.options.previousOptions;
-			}
-		}
-
-		if (layer instanceof L.Marker) {
-			layer.dragging.disable();
-			layer.off('dragend', this._onMarkerDragEnd, this);
-		} else {
-			layer.editing.disable();
-		}
+    layer.off('mousedown', this._onLayerDragStart, this);
+    //layer.off('click', this._onLayerDragEnd, this);
+    this._map.off('mouseup', this._onLayerDragEnd, this);
 	},
+
+  _onLayerDragStart: function(e){
+    console.log('dragging started');
+    this._startingPosition = e.latLng;
+    //debugger;
+    this._map.on('mousemove', this._onLayerDrag, this);
+    this._draggingLayer = e.layer || e.target || e;
+    this._originalGeoJSON = this._draggingLayer.toGeoJSON();
+    this._originalLatLng = e.latlng;
+  },
+
+  _onLayerDrag: function(e){
+    //console.log('dragging in progress');
+    var distance = cartesian_distance( e.latlng, this._originalLatLng );
+    //console.log(distance + ' pixels from start');
+    //var geoJSON = this._draggingLayer.toGeoJSON();
+    // based on Daniel Kempkens' code @ https://coderwall.com/p/zb_zdw
+    var geoReader = new jsts.io.GeoJSONReader(),
+        geoWriter = new jsts.io.GeoJSONWriter();
+    var geometry = geoReader.read(this._originalGeoJSON).geometry.buffer(distance);
+    this._draggingLayer.setLatLngs(geoWriter.write(geometry).coordinates[0].map(geoJsonToLatLng));
+  },
+  
+  _onLayerDragEnd: function(e){
+    console.log('dragging ended');
+    this._featureGroup.off('mousemove', this._onLayerDrag, this);
+    this._draggingLayer = null;
+  },
+
 
 	_onMarkerDragEnd: function (e) {
 		var layer = e.target;
