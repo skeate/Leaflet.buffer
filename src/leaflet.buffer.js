@@ -8,14 +8,14 @@ function haversine_distance(latLng1, latLng2){
   var haversin = function(theta){
     return Math.sin(theta/2) * Math.sin(theta/2);
   };
-  var R = 6.371; // Mm
-  var lat1 = latLng1.lat * 180 / Math.PI;
-  var lat2 = latLng2.lat * 180 / Math.PI;
-  var lng1 = latLng1.lng * 180 / Math.PI;
-  var lng2 = latLng2.lng * 180 / Math.PI;
+  var R = 6371; // km
+  var lat1 = latLng1.lat * Math.PI / 180;
+  var lat2 = latLng2.lat * Math.PI / 180;
+  var lng1 = latLng1.lng * Math.PI / 180;
+  var lng2 = latLng2.lng * Math.PI / 180;
   var d_lat = lat2 - lat1;
   var d_lng = lng2 - lng1;
-  var a = haversin(d_lat/2) * Math.cos(lat1) * Math.cos(lat2) * haversin(d_lng/2);
+  var a = haversin(d_lat) + Math.cos(lat1) * Math.cos(lat2) * haversin(d_lng);
   var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
   return R * c;
 }
