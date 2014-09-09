@@ -20,5 +20,12 @@
   "bugs": {
     "url": "https://github.com/skeate/Leaflet.buffer/issues"
   },
-  "homepage": "https://github.com/skeate/Leaflet.buffer"
+  "homepage": "https://github.com/skeate/Leaflet.buffer",
+  "devDependencies": {
+    "chai": "^1.9.1",
+    "express": "^4.9.0",
+    "mocha": "^1.21.4",
+    "webdriverjs": "^1.7.5",
+    "webdriverjs-selenium-bundle": "0.0.2"
+  }
 }
