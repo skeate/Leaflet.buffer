@@ -1,6 +1,6 @@
 {
   "name": "Leaflet.buffer",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Create a buffer around shapes drawn with [Leaflet.draw](https://github.com/Leaflet/Leaflet.draw).",
   "main": "index.js",
   "scripts": {
@@ -20,9 +20,5 @@
   "bugs": {
     "url": "https://github.com/skeate/Leaflet.buffer/issues"
   },
-  "homepage": "https://github.com/skeate/Leaflet.buffer",
-  "dependencies": {
-    "jsts": "^0.14.0",
-    "leaflet": "^0.7.3"
-  }
+  "homepage": "https://github.com/skeate/Leaflet.buffer"
 }
