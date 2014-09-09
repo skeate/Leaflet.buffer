@@ -281,7 +281,9 @@
 
     _onLayerDragEnd: function(e){
       var data = this._bufferData[this._draggingLayerId];
-      data.size = data.temp_size;
+      if( data ){
+        data.size = data.temp_size;
+      }
       this._map.off('mousemove', this._onLayerDrag, this);
       this._draggingLayer = null;
     },
