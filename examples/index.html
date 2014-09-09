@@ -22,7 +22,7 @@
       var osmUrl = 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
       osmAttrib = '&copy; <a href="http://openstreetmap.org/copyright">OpenStreetMap</a> contributors',
       osm = L.tileLayer(osmUrl, {maxZoom: 18, attribution: osmAttrib}),
-      map = new L.Map('map', {layers: [osm], center: new L.LatLng(-37.7772, 175.2756), zoom: 15 });
+      map = new L.Map('map', {layers: [osm], center: new L.LatLng(38.8977, -77.0366), zoom: 15 });
 
       var drawnItems = new L.FeatureGroup();
       map.addLayer(drawnItems);
@@ -54,7 +54,9 @@
         edit: {
           featureGroup: drawnItems,
           remove: true,
-          buffer: {}
+          buffer: {
+            replace_polylines: false
+          }
         }
       });
       map.addControl(drawControl);
