@@ -26,224 +26,272 @@ function cartesian_distance(latLng1, latLng2){
   return Math.sqrt(d_lat * d_lat + d_lng * d_lng);
 }
 
+L.Polygon.include({
+  getCentroid: function(){
+    return this.getLatLngs().reduce(function(data, next){
+      data.count++;
+      data.latSum += next.lat;
+      data.lngSum += next.lng;
+      data.avg = L.latLng(data.latSum/data.count, data.lngSum/data.count);
+      return data;
+    }, {count: 0, latSum: 0, lngSum: 0}).avg;
+  }
+});
+
 L.drawLocal.edit.toolbar.buttons.buffer = 'Expand layers.';
 L.drawLocal.edit.toolbar.buttons.bufferDisabled = 'No layers to expand.';
 L.drawLocal.edit.handlers.buffer = { tooltip: { text: 'Click and drag to expand or contract a shape.' } };
 
-L.EditToolbar.prototype.options.buffer = {};
 var getModeHandlers = L.EditToolbar.prototype.getModeHandlers;
 L.EditToolbar.prototype.getModeHandlers = function(map){
+  var options = this.options.buffer;
+  if( options ){
+    options.featureGroup = this.options.featureGroup;
+    if( !( 'replace_polyline' in options ) ){ options.replace_polyline = true; }
+  }
   return getModeHandlers.call(this, map).concat([{
-    enabled: this.options.buffer,
-    handler: new L.EditToolbar.Buffer(map, {
-      featureGroup: this.options.featureGroup
-    })
+    enabled: options,
+    handler: new L.EditToolbar.Buffer(map, options)
   }]);
 };
 
 L.EditToolbar.Buffer = L.Handler.extend({
-	statics: {
-		TYPE: 'buffer'
-	},
+  statics: {
+    TYPE: 'buffer'
+  },
 
-	includes: L.Mixin.Events,
+  includes: L.Mixin.Events,
 
   _draggingLayer: null,
+  _originalPolylines: {},
+  _bufferData: {},
 
-	initialize: function (map, options) {
-		L.Handler.prototype.initialize.call(this, map);
+  initialize: function (map, options) {
+    L.Handler.prototype.initialize.call(this, map);
 
-		// Set options to the default unless already set
-		this._selectedPathOptions = options.selectedPathOptions;
+    // Set options to the default unless already set
+    this._selectedPathOptions = options.selectedPathOptions;
 
-		// Store the selectable layer group for ease of access
-		this._featureGroup = options.featureGroup;
+    // Store the selectable layer group for ease of access
+    this._featureGroup = options.featureGroup;
 
-		if (!(this._featureGroup instanceof L.FeatureGroup)) {
-			throw new Error('options.featureGroup must be a L.FeatureGroup');
-		}
+    this._replace_polyline = options.replace_polyline;
 
-		this._unbufferedLayerProps = {};
+    if (!(this._featureGroup instanceof L.FeatureGroup)) {
+      throw new Error('options.featureGroup must be a L.FeatureGroup');
+    }
 
-		// Save the type so super can fire, need to do this as cannot do this.TYPE :(
-		this.type = L.EditToolbar.Buffer.TYPE;
-	},
+    this._unbufferedLayerProps = {};
 
-	enable: function () {
-		if (this._enabled || !this._hasAvailableLayers()) {
-			return;
-		}
-		this.fire('enabled', {handler: this.type});
-			//this disable other handlers
+    // Save the type so super can fire, need to do this as cannot do this.TYPE :(
+    this.type = L.EditToolbar.Buffer.TYPE;
+  },
 
-		this._map.fire('draw:bufferstart', { handler: this.type });
-			//allow drawLayer to be updated before beginning edition.
+  enable: function () {
+    if (this._enabled || !this._hasAvailableLayers()) {
+      return;
+    }
+    this.fire('enabled', {handler: this.type});
+    //this disable other handlers
 
-		L.Handler.prototype.enable.call(this);
-		this._featureGroup
-			.on('layeradd', this._enableLayerBuffer, this)
-			.on('layerremove', this._disableLayerBuffer, this);
-	},
+    this._map.fire('draw:bufferstart', { handler: this.type });
+    //allow drawLayer to be updated before beginning edition.
 
-	disable: function () {
-		if (!this._enabled) { return; }
-		this._featureGroup
-			.off('layeradd', this._enableLayerBuffer, this)
-			.off('layerremove', this._disableLayerBuffer, this);
-		L.Handler.prototype.disable.call(this);
-		this._map.fire('draw:bufferstop', { handler: this.type });
-		this.fire('disabled', {handler: this.type});
-	},
+    L.Handler.prototype.enable.call(this);
+    this._featureGroup
+    .on('layeradd', this._enableLayerBuffer, this)
+    .on('layerremove', this._disableLayerBuffer, this);
+  },
 
-	addHooks: function () {
-		var map = this._map;
+  disable: function () {
+    if (!this._enabled) { return; }
+    this._featureGroup
+    .off('layeradd', this._enableLayerBuffer, this)
+    .off('layerremove', this._disableLayerBuffer, this);
+    L.Handler.prototype.disable.call(this);
+    this._map.fire('draw:bufferstop', { handler: this.type });
+    this.fire('disabled', {handler: this.type});
+  },
 
-		if (map) {
-			map.getContainer().focus();
+  addHooks: function () {
+    var map = this._map;
 
-			this._featureGroup.eachLayer(this._enableLayerBuffer, this);
+    if (map) {
+      map.getContainer().focus();
 
-			this._tooltip = new L.Tooltip(this._map);
-			this._tooltip.updateContent({ text: L.drawLocal.edit.handlers.buffer.tooltip.text });
+      this._featureGroup.eachLayer(this._enableLayerBuffer, this);
 
-			this._map.on('mousemove', this._onMouseMove, this);
-		}
-	},
+      this._tooltip = new L.Tooltip(this._map);
+      this._tooltip.updateContent({ text: L.drawLocal.edit.handlers.buffer.tooltip.text });
 
-	removeHooks: function () {
-		if (this._map) {
-			// Clean up selected layers.
-			this._featureGroup.eachLayer(this._disableLayerBuffer, this);
+      this._map.on('mousemove', this._onMouseMove, this);
+    }
+  },
 
-			// Clear the backups of the original layers
-			this._unbufferedLayerProps = {};
+  removeHooks: function () {
+    if (this._map) {
+      // Clean up selected layers.
+      this._featureGroup.eachLayer(this._disableLayerBuffer, this);
 
-			this._tooltip.dispose();
-			this._tooltip = null;
+      // Clear the backups of the original layers
+      this._unbufferedLayerProps = {};
 
-			this._map.off('mousemove', this._onMouseMove, this);
-		}
-	},
+      this._tooltip.dispose();
+      this._tooltip = null;
 
-	revertLayers: function () {
-		this._featureGroup.eachLayer(function (layer) {
-			this._revertLayer(layer);
-		}, this);
-	},
+      this._map.off('mousemove', this._onMouseMove, this);
+    }
+  },
 
-	save: function () {
-		var bufferedLayers = new L.LayerGroup();
-		this._featureGroup.eachLayer(function (layer) {
-			if (layer.buffered) {
-				bufferedLayers.addLayer(layer);
-				layer.buffered = false;
-			}
-		});
-		this._map.fire('draw:buffered', {layers: editedLayers});
-	},
+  revertLayers: function () {
+    this._featureGroup.eachLayer(function (layer) {
+      this._revertLayer(layer);
+    }, this);
+  },
 
-	_backupLayer: function (layer) {
-		var id = L.Util.stamp(layer);
+  save: function () {
+    var bufferedLayers = new L.LayerGroup();
+    this._featureGroup.eachLayer(function (layer) {
+      if (layer.buffered) {
+        bufferedLayers.addLayer(layer);
+        layer.buffered = false;
+      }
+    });
+    this._map.fire('draw:buffered', {layers: bufferedLayers});
+  },
 
-		if (!this._unbufferedLayerProps[id]) {
-			// Polyline, Polygon or Rectangle
-			if (layer instanceof L.Polyline || layer instanceof L.Polygon || layer instanceof L.Rectangle) {
-				this._unbufferedLayerProps[id] = {
-					latlngs: L.LatLngUtil.cloneLatLngs(layer.getLatLngs())
-				};
-			} else if (layer instanceof L.Circle) {
-				this._unbufferedLayerProps[id] = {
-					latlng: L.LatLngUtil.cloneLatLng(layer.getLatLng()),
-					radius: layer.getRadius()
-				};
-			} else if (layer instanceof L.Marker) { // Marker
-				this._unbufferedLayerProps[id] = {
-					latlng: L.LatLngUtil.cloneLatLng(layer.getLatLng())
-				};
-			}
-		}
-	},
+  _backupLayer: function (layer) {
+    var id = L.Util.stamp(layer);
+    if (!this._unbufferedLayerProps[id]) {
+      // Polygon or Rectangle
+      if( layer instanceof L.Polygon || layer instanceof L.Rectangle ){
+        this._unbufferedLayerProps[id] = {
+          latlngs: L.LatLngUtil.cloneLatLngs(layer.getLatLngs())
+        };
+      }
+      // Circle
+      else if (layer instanceof L.Circle) {
+        this._unbufferedLayerProps[id] = {
+          latlng: L.LatLngUtil.cloneLatLng(layer.getLatLng()),
+          radius: layer.getRadius()
+        };
+      }
+    }
+  },
 
-	_revertLayer: function (layer) {
-		var id = L.Util.stamp(layer);
-		layer.buffered = false;
-		if (this._unbufferedLayerProps.hasOwnProperty(id)) {
-			// Polyline, Polygon or Rectangle
-			if (layer instanceof L.Polyline || layer instanceof L.Polygon || layer instanceof L.Rectangle) {
-				layer.setLatLngs(this._unbufferedLayerProps[id].latlngs);
-			} else if (layer instanceof L.Circle) {
-				layer.setLatLng(this._unbufferedLayerProps[id].latlng);
-				layer.setRadius(this._unbufferedLayerProps[id].radius);
-			} else if (layer instanceof L.Marker) { // Marker
-				layer.setLatLng(this._unbufferedLayerProps[id].latlng);
-			}
-		}
-	},
+  _revertLayer: function (layer) {
+    var id = L.Util.stamp(layer);
+    layer.buffered = false;
+    if( id in this._originalPolylines ){
+      // a polyline that got replaced with a polygon
+      this._featureGroup.addLayer(this._originalPolylines[id]);
+      delete this._originalPolylines[id];
+    }
+    else if (this._unbufferedLayerProps.hasOwnProperty(id)) {
+      // Polygon or Rectangle
+      if( layer instanceof L.Polygon || layer instanceof L.Rectangle ){
+        layer.setLatLngs(this._unbufferedLayerProps[id].latlngs);
+      } else if (layer instanceof L.Circle) {
+        layer.setLatLng(this._unbufferedLayerProps[id].latlng);
+        layer.setRadius(this._unbufferedLayerProps[id].radius);
+      }
+    }
+    else if( layer instanceof L.Polygon ){
+      // a Polygon created from a polyline -- just delete
+      this._map.removeLayer(layer);
+    }
+  },
 
-	_enableLayerBuffer: function (e) {
-		var layer = e.layer || e.target || e,
-			isMarker = layer instanceof L.Marker;
+  _enableLayerBuffer: function (e) {
+    var layer = e.layer || e.target || e;
 
-    if( !isMarker ){
+    if( !(layer instanceof L.Marker) ){
       // Back up this layer (if haven't before)
       this._backupLayer(layer);
       layer.on('mousedown', this._onLayerDragStart, this);
-      //layer.on('click', this._onLayerDragEnd, this);
       this._map.on('mouseup', this._onLayerDragEnd, this);
     }
-	},
+  },
 
-	_disableLayerBuffer: function (e) {
-		var layer = e.layer || e.target || e;
-		layer.edited = false;
+  _disableLayerBuffer: function (e) {
+    var layer = e.layer || e.target || e;
+    layer.edited = false;
 
     layer.off('mousedown', this._onLayerDragStart, this);
-    //layer.off('click', this._onLayerDragEnd, this);
     this._map.off('mouseup', this._onLayerDragEnd, this);
-	},
+  },
 
   _onLayerDragStart: function(e){
+    var layer = e.layer || e.target || e;
     console.log('dragging started');
+
+    if( layer instanceof L.Polyline && !(layer instanceof L.Polygon) ){
+      var temp = layer;
+      var geoReader = new jsts.io.GeoJSONReader(),
+          geoWriter = new jsts.io.GeoJSONWriter();
+      var geometry = geoReader.read(temp.toGeoJSON()).geometry.buffer(0);
+      layer = new L.Polygon(geoWriter.write(geometry).coordinates[0].map(geoJsonToLatLng));
+      layer.options.fill = true;
+      layer.setStyle('fill', true);
+      this._originalPolylines[L.Util.stamp(layer)] = temp;
+      if( this._replace_polyline ){
+        this._featureGroup.removeLayer(temp);
+      }
+      this._featureGroup.addLayer(layer);
+    }
     this._startingPosition = e.latLng;
-    //debugger;
     this._map.on('mousemove', this._onLayerDrag, this);
-    this._draggingLayer = e.layer || e.target || e;
-    //debugger;
-    this._originalGeoJSON = this._draggingLayer.toGeoJSON();
-    this._originalLatLng = e.latlng;
+    this._draggingLayer = layer;
+    this._draggingLayerId = L.Util.stamp(layer);
+    var centroid = layer.getCentroid();
+    if( !( this._draggingLayerId in this._bufferData ) ){
+      this._bufferData[this._draggingLayerId] = {
+        size: 0,
+        orig_geoJSON: layer.toGeoJSON()
+      };
+    } 
+    this._bufferData[this._draggingLayerId].centroid = centroid;
+    this._bufferData[this._draggingLayerId].orig_distanceToCenter = e.latlng.distanceTo(this._bufferData[this._draggingLayerId].centroid);
   },
 
   _onLayerDrag: function(e){
-    var distance = cartesian_distance( e.latlng, this._originalLatLng );
+    var data = this._bufferData[this._draggingLayerId];
+    var distance = ( data.centroid.distanceTo( e.latlng ) - data.orig_distanceToCenter ); // 111120;
+    //console.log('haversine function: '+haversine_distance(e.latlng, data.centroid));
+    //console.log('built-in function: '+data.centroid.distanceTo(e.latlng));
+    console.log('distance: ' + distance + 'm' );
+    distance /= 111120;
     // based on Daniel Kempkens' code @ https://coderwall.com/p/zb_zdw
     var geoReader = new jsts.io.GeoJSONReader(),
         geoWriter = new jsts.io.GeoJSONWriter();
-    var geometry = geoReader.read(this._originalGeoJSON).geometry.buffer(distance);
-    this._draggingLayer.setLatLngs(geoWriter.write(geometry).coordinates[0].map(geoJsonToLatLng));
-    if( this._draggingLayer instanceof L.Polyline ){
-      this._draggingLayer.__proto__ = L.Polygon.prototype;
-      this._draggingLayer.options.fill = true;
-      this._draggingLayer.setStyle('fill', true);
+    var geometry = geoReader.read(data.orig_geoJSON).geometry.buffer(data.size + distance);
+    var newGeometry = geoWriter.write(geometry);
+    if( newGeometry.type !== 'MultiPolygon' ){
+      this._draggingLayer.setLatLngs(newGeometry.coordinates[0].map(geoJsonToLatLng));
     }
   },
-  
+
   _onLayerDragEnd: function(e){
+    var data = this._bufferData[this._draggingLayerId];
+    var distance = ( data.centroid.distanceTo( e.latlng ) - data.orig_distanceToCenter ); // 111120;
+    distance /= 111120;
+    data.size += distance;
     console.log('dragging ended');
-    this._featureGroup.off('mousemove', this._onLayerDrag, this);
+    this._map.off('mousemove', this._onLayerDrag, this);
     this._draggingLayer = null;
   },
 
 
-	_onMarkerDragEnd: function (e) {
-		var layer = e.target;
-		layer.edited = true;
-	},
+  _onMarkerDragEnd: function (e) {
+    var layer = e.target;
+    layer.edited = true;
+  },
 
-	_onMouseMove: function (e) {
-		this._tooltip.updatePosition(e.latlng);
-	},
+  _onMouseMove: function (e) {
+    this._tooltip.updatePosition(e.latlng);
+  },
 
-	_hasAvailableLayers: function () {
-		return this._featureGroup.getLayers().length !== 0;
-	}
+  _hasAvailableLayers: function () {
+    return this._featureGroup.getLayers().length !== 0;
+  }
 });
