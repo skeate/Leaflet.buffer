@@ -28,7 +28,7 @@
 
   L.drawLocal.edit.toolbar.buttons.buffer = 'Expand layers.';
   L.drawLocal.edit.toolbar.buttons.bufferDisabled = 'No layers to expand.';
-  L.drawLocal.edit.handlers.buffer = { tooltip: { text: 'Click and drag to expand or contract a shape.' } };
+  L.drawLocal.edit.handlers.buffer = { tooltip: { text:  'Click and drag to expand or contract a shape.' } };
 
   var getModeHandlers = L.EditToolbar.prototype.getModeHandlers;
   L.EditToolbar.prototype.getModeHandlers = function(map){
@@ -127,7 +127,7 @@
         map.getContainer().focus();
         this._featureGroup.eachLayer(this._enableLayerBuffer, this);
         this._tooltip = new L.Tooltip(this._map);
-        this._tooltip.updateContent({ text: L.drawLocal.edit.handlers.buffer.tooltip.text });
+        this._setTooltip(L.drawLocal.edit.handlers.buffer.tooltip.text);
         this._map.on('mousemove', this._onMouseMove, this);
       }
     },
@@ -250,18 +250,23 @@
         this._bufferData[this._draggingLayerId] = {
           size: 0,
           temp_size: 0,
+          radius: 0,
+          temp_radius: 0,
           orig_geoJSON: layer.toGeoJSON()
         };
       } 
       var centroid = layer.getCentroid();
       this._bufferData[this._draggingLayerId].centroid = centroid;
       this._bufferData[this._draggingLayerId].orig_distanceToCenter = e.latlng.distanceTo(this._bufferData[this._draggingLayerId].centroid);
+      this._setTooltip(this._bufferData[this._draggingLayerId].radius);
     },
 
     _onLayerDrag: function(e){
       var data = this._bufferData[this._draggingLayerId];
       // this calculates the buffer distance in ~meters
       var distance = ( data.centroid.distanceTo( e.latlng ) - data.orig_distanceToCenter );
+      data.temp_radius = data.radius + distance;
+      this._setTooltip(data.temp_radius);
       // buffer seems to be based on deg lat, so this converts meter distance to ~degrees
       distance /= 111120;
       data.temp_size = data.size + distance;
@@ -283,9 +288,11 @@
       var data = this._bufferData[this._draggingLayerId];
       if( data ){
         data.size = data.temp_size;
+        data.radius = data.temp_radius;
       }
       this._map.off('mousemove', this._onLayerDrag, this);
       this._draggingLayer = null;
+      this._setTooltip(L.drawLocal.edit.handlers.buffer.tooltip.text);
     },
 
 
@@ -300,6 +307,17 @@
 
     _hasAvailableLayers: function () {
       return this._featureGroup.getLayers().length !== 0;
+    },
+    
+    _setTooltip: function(radius_or_message){
+      var message;
+      if( typeof radius_or_message === 'string' ){
+        message = radius_or_message;
+      }
+      else{
+        message = "Buffer radius: "+radius_or_message+"m";
+      }
+      this._tooltip.updateContent({text: message});
     }
   });
 })(window, document);
