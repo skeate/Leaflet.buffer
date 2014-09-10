@@ -25,7 +25,7 @@
     "chai": "^1.9.1",
     "express": "^4.9.0",
     "mocha": "^1.21.4",
-    "webdriverjs": "^1.7.5",
+    "webdriverio": "^2.2.1",
     "webdriverjs-selenium-bundle": "0.0.2"
   }
 }
