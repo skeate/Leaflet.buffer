@@ -16,7 +16,7 @@ describe('Leaflet.buffer', function(){
       // Set up Selenium & webdriver
       client = webdriverio.remote({
         desiredCapabilities: {
-          browserName: 'chrome'
+          browserName: 'phantomjs'
         }
       });
       client.use(wdjsSeleniumBundle({autostop: true}));
