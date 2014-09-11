@@ -315,7 +315,17 @@
         message = radius_or_message;
       }
       else{
-        message = "Buffer radius: "+radius_or_message+"m";
+        var radius_m = radius_or_message;
+        var radius_km = radius_m / 1000;
+        var radius_ft = radius_m * 3.28084;
+        var radius_mi = radius_ft / 5280;
+        var metric_unit = radius_km >= 1 ? "km" : "m";
+        var metric_value = (radius_km >= 1 ? radius_km : radius_m).toFixed(2);
+        var imperial_unit = radius_mi >= 0.1 ? "mi" : "ft";
+        var imperial_value = (radius_mi >= .1 ? radius_mi : radius_ft).toFixed(2);
+        message  = "Buffer radius: ";
+        message += metric_value + metric_unit + " ";
+        message += imperial_value + imperial_unit + " ";
       }
       this._tooltip.updateContent({text: message});
     }
