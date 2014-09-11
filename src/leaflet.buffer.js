@@ -167,6 +167,7 @@
           layer.buffered = false;
         }
       });
+      this._originalPolylines = {};
       this._map.fire('draw:buffered', {layers: bufferedLayers});
     },
 
