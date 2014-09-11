@@ -26,6 +26,12 @@
     }
   });
 
+  L.Circle.include({
+    getCentroid: function(){
+      return this.getLatLng();
+    }
+  });
+
   L.drawLocal.edit.toolbar.buttons.buffer = 'Expand layers.';
   L.drawLocal.edit.toolbar.buttons.bufferDisabled = 'No layers to expand.';
   L.drawLocal.edit.handlers.buffer = { tooltip: { text:  'Click and drag to expand or contract a shape.' } };
@@ -247,13 +253,22 @@
       this._draggingLayer = layer;
       this._draggingLayerId = L.Util.stamp(layer);
       if( !( this._draggingLayerId in this._bufferData ) ){
-        this._bufferData[this._draggingLayerId] = {
-          size: 0,
-          temp_size: 0,
-          radius: 0,
-          temp_radius: 0,
-          orig_geoJSON: layer.toGeoJSON()
-        };
+        if( layer instanceof L.Circle ){
+          this._bufferData[this._draggingLayerId] = {
+            radius: layer.getRadius(),
+            temp_radius: 0,
+            orig_geoJSON: layer.toGeoJSON()
+          };
+        }
+        else{
+          this._bufferData[this._draggingLayerId] = {
+            size: 0,
+            temp_size: 0,
+            radius: 0,
+            temp_radius: 0,
+            orig_geoJSON: layer.toGeoJSON()
+          };
+        }
       } 
       var centroid = layer.getCentroid();
       this._bufferData[this._draggingLayerId].centroid = centroid;
@@ -267,20 +282,25 @@
       var distance = ( data.centroid.distanceTo( e.latlng ) - data.orig_distanceToCenter );
       data.temp_radius = data.radius + distance;
       this._setTooltip(data.temp_radius);
-      // buffer seems to be based on deg lat, so this converts meter distance to ~degrees
-      distance /= 111120;
-      data.temp_size = data.size + distance;
 
-      // based on Daniel Kempkens' code @ https://coderwall.com/p/zb_zdw
-      var geoReader = new jsts.io.GeoJSONReader(),
-      geoWriter = new jsts.io.GeoJSONWriter();
-      var geometry = geoReader.read(data.orig_geoJSON).geometry.buffer(data.temp_size);
-      var newGeometry = geoWriter.write(geometry);
-      if( newGeometry.type !== 'MultiPolygon' ){
-        this._draggingLayer.setLatLngs(newGeometry.coordinates[0].map(geoJsonToLatLng));
+      if( this._draggingLayer instanceof L.Circle ){
+        this._draggingLayer.setRadius( data.temp_radius );
       }
       else{
-        // todo: handle multipolygons
+        // buffer seems to be based on deg lat, so this converts meter distance to ~degrees
+        distance /= 111120;
+        data.temp_size = data.size + distance;
+        // based on Daniel Kempkens' code @ https://coderwall.com/p/zb_zdw
+        var geoReader = new jsts.io.GeoJSONReader(),
+        geoWriter = new jsts.io.GeoJSONWriter();
+        var geometry = geoReader.read(data.orig_geoJSON).geometry.buffer(data.temp_size);
+        var newGeometry = geoWriter.write(geometry);
+        if( newGeometry.type !== 'MultiPolygon' ){
+          this._draggingLayer.setLatLngs(newGeometry.coordinates[0].map(geoJsonToLatLng));
+        }
+        else{
+          // todo: handle multipolygons
+        }
       }
     },
 
