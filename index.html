@@ -54,23 +54,23 @@
 <h2>
 <a name="demo" class="anchor" href="#demo"><span class="octicon octicon-link"></span></a>Demo</h2>
 
-<pre><code>&lt;div id="map" style="width: 800px; height: 600px; border: 1px solid #ccc"&gt;&lt;/div&gt;
+<div id="map" style="width: 800px; height: 600px; border: 1px solid #ccc"></div>
 
-&lt;!-- leaflet --&gt;
-&lt;script src="lib/leaflet-src.js"&gt;&lt;/script&gt;
-&lt;link rel="stylesheet" href="lib/leaflet.css"&gt;
-&lt;!-- leaflet.draw --&gt;
-&lt;script src="lib/leaflet.draw-src.js"&gt;&lt;/script&gt;
-&lt;link rel="stylesheet" href="lib/leaflet.draw.css"&gt;
-&lt;!-- jsts --&gt;
-&lt;script src="lib/javascript.util.js"&gt;&lt;/script&gt;
-&lt;script src="lib/jsts.js"&gt;&lt;/script&gt;
-&lt;!-- leaflet.buffer --&gt;
-&lt;script src="../src/leaflet.buffer.js"&gt;&lt;/script&gt;
-&lt;link rel="stylesheet" href="../src/leaflet.buffer.css"&gt;
-&lt;script&gt;
+<!-- leaflet -->
+<script src="lib/leaflet-src.js"></script>
+<link rel="stylesheet" href="lib/leaflet.css">
+<!-- leaflet.draw -->
+<script src="lib/leaflet.draw-src.js"></script>
+<link rel="stylesheet" href="lib/leaflet.draw.css">
+<!-- jsts -->
+<script src="lib/javascript.util.js"></script>
+<script src="lib/jsts.js"></script>
+<!-- leaflet.buffer -->
+<script src="lib/leaflet.buffer.js"></script>
+<link rel="stylesheet" href="lib/leaflet.buffer.css">
+<script>
   var osmUrl = 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-  osmAttrib = '&amp;copy; &lt;a href="http://openstreetmap.org/copyright"&gt;OpenStreetMap&lt;/a&gt; contributors',
+  osmAttrib = '&amp;copy; <a href="http://openstreetmap.org/copyright">OpenStreetMap</a> contributors',
   osm = L.tileLayer(osmUrl, {maxZoom: 18, attribution: osmAttrib}),
   map = new L.Map('map', {layers: [osm], center: new L.LatLng(38.8977, -77.0366), zoom: 15 });
 
@@ -121,8 +121,7 @@
 
     drawnItems.addLayer(layer);
   });
-&lt;/script&gt;
-</code></pre>
+</script>
       </section>
 
       <footer>
