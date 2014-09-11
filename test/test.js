@@ -9,7 +9,7 @@ describe('Leaflet.buffer', function(){
   var client;
 
   before(function(done){
-    this.timeout(9000); // selenium/chrome take a while to start up
+    this.timeout(60000); // selenium/chrome take a while to start up
     var app = express();
     app.use(express.static(path.join(__dirname, '..')));
     app.listen(8888, function(){
