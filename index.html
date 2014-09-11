@@ -18,6 +18,16 @@
       })
     </script>
     <title>Leaflet.buffer by skeate</title>
+
+    <style>
+      #map img{
+        border: none;
+        box-shadow: none;
+        -webkit-box-shadow: none;
+        -moz-box-shadow: none;
+        max-width: none;
+      }
+    </style>
   </head>
 
   <body>
@@ -47,81 +57,95 @@
 
       <section id="main_content">
         <h1>
-<a name="leafletbuffer" class="anchor" href="#leafletbuffer"><span class="octicon octicon-link"></span></a>Leaflet.buffer</h1>
+          <a name="leafletbuffer" class="anchor" href="#leafletbuffer">
+            <span class="octicon octicon-link"></span>
+          </a>
+          Description
+        </h1>
 
-<p>Create a buffer around shapes drawn with <a href="https://github.com/Leaflet/Leaflet.draw">Leaflet.draw</a>.</p>
+        <p>
+          Leaflet.buffer is an extension to <a href="https://github.com/Leaflet/Leaflet.draw">Leaflet.draw</a> that allows the user
+          to create a buffer around shapes. 
+        </p>
 
-<h2>
-<a name="demo" class="anchor" href="#demo"><span class="octicon octicon-link"></span></a>Demo</h2>
+        <h1>
+          <a name="demo" class="anchor" href="#demo">
+            <span class="octicon octicon-link"></span>
+          </a>
+          Demo
+        </h1>
 
-<div id="map" style="width: 800px; height: 600px; border: 1px solid #ccc"></div>
+        <div id="map" style="width: 502px; height: 600px; border: 1px solid #ccc"></div>
 
-<!-- leaflet -->
-<script src="lib/leaflet-src.js"></script>
-<link rel="stylesheet" href="lib/leaflet.css">
-<!-- leaflet.draw -->
-<script src="lib/leaflet.draw-src.js"></script>
-<link rel="stylesheet" href="lib/leaflet.draw.css">
-<!-- jsts -->
-<script src="lib/javascript.util.js"></script>
-<script src="lib/jsts.js"></script>
-<!-- leaflet.buffer -->
-<script src="lib/leaflet.buffer.js"></script>
-<link rel="stylesheet" href="lib/leaflet.buffer.css">
-<script>
-  var osmUrl = 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-  osmAttrib = '&amp;copy; <a href="http://openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-  osm = L.tileLayer(osmUrl, {maxZoom: 18, attribution: osmAttrib}),
-  map = new L.Map('map', {layers: [osm], center: new L.LatLng(38.8977, -77.0366), zoom: 15 });
+        <!-- leaflet -->
+        <script src="lib/leaflet-src.js"></script>
+        <link rel="stylesheet" href="lib/leaflet.css">
+        <!-- leaflet.draw -->
+        <script src="lib/leaflet.draw-src.js"></script>
+        <link rel="stylesheet" href="lib/leaflet.draw.css">
+        <!-- jsts -->
+        <script src="lib/javascript.util.js"></script>
+        <script src="lib/jsts.js"></script>
+        <!-- leaflet.buffer -->
+        <script src="lib/leaflet.buffer.js"></script>
+        <link rel="stylesheet" href="lib/leaflet.buffer.css">
+        <script>
+          var osmUrl = 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+          osmAttrib = '&copy; <a href="http://openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+          osm = L.tileLayer(osmUrl, {maxZoom: 18, attribution: osmAttrib}),
+          map = new L.Map('map', {layers: [osm], center: new L.LatLng(38.8977, -77.0366), zoom: 15 });
 
-  var drawnItems = new L.FeatureGroup();
-  map.addLayer(drawnItems);
+          var drawnItems = new L.FeatureGroup();
+          map.addLayer(drawnItems);
 
-  var drawControl = new L.Control.Draw({
-    position: 'topright',
-    draw: {
-      polyline: {
-        metric: true
-      },
-      polygon: {
-        allowIntersection: false,
-        showArea: true,
-        drawError: {
-          color: '#b00b00',
-          timeout: 1000
-        },
-        shapeOptions: {
-          color: '#bada55'
-        }
-      },
-      circle: {
-        shapeOptions: {
-          color: '#662d91'
-        }
-      },
-      marker: false
-    },
-    edit: {
-      featureGroup: drawnItems,
-      remove: true,
-      buffer: {
-        replace_polylines: false
-      }
-    }
-  });
-  map.addControl(drawControl);
+          var drawControl = new L.Control.Draw({
+            position: 'topright',
+            draw: {
+              polyline: {
+                metric: true,
+                shapeOptions: {
+                  color: '#000080'
+                }
+              },
+              polygon: {
+                allowIntersection: false,
+                showArea: true,
+                drawError: {
+                  color: '#b00b00',
+                  timeout: 1000
+                },
+                shapeOptions: {
+                  color: '#3F115B'
+                }
+              },
+              circle: {
+                shapeOptions: {
+                  color: '#208F30'
+                }
+              },
+              marker: false
+            },
+            edit: {
+              featureGroup: drawnItems,
+              remove: true,
+              buffer: {
+                replace_polylines: false
+              }
+            }
+          });
+          map.addControl(drawControl);
 
-  map.on('draw:created', function (e) {
-    var type = e.layerType,
-    layer = e.layer;
+          map.on('draw:created', function (e) {
+            var type = e.layerType,
+            layer = e.layer;
 
-    if (type === 'marker') {
-      layer.bindPopup('A popup!');
-    }
+            if (type === 'marker') {
+              layer.bindPopup('A popup!');
+            }
 
-    drawnItems.addLayer(layer);
-  });
-</script>
+            drawnItems.addLayer(layer);
+          });
+        </script>
       </section>
 
       <footer>
@@ -138,16 +162,16 @@
 
     </div>
 
-              <script type="text/javascript">
-            var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
-            document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
-          </script>
-          <script type="text/javascript">
-            try {
-              var pageTracker = _gat._getTracker("UA-54709915-1");
-            pageTracker._trackPageview();
-            } catch(err) {}
-          </script>
+    <script type="text/javascript">
+      var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+      document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+    </script>
+    <script type="text/javascript">
+      try {
+        var pageTracker = _gat._getTracker("UA-54709915-1");
+        pageTracker._trackPageview();
+      } catch(err) {}
+    </script>
 
   </body>
 </html>
