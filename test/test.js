@@ -3,7 +3,10 @@ var express = require('express');
 var path = require('path');
 var webdriverio = require('webdriverio');
 var wdjsSeleniumBundle = require('webdriverjs-selenium-bundle');
-
+var istanbul = require('istanbul');
+var http = require('http');
+var collector = new istanbul.Collector();
+var reporter = new istanbul.Reporter();
 
 describe('Leaflet.buffer', function(){
   var client;
@@ -29,7 +32,14 @@ describe('Leaflet.buffer', function(){
   });
 
   after(function(done){
+    client.frame(null);
+    client.execute(function(){return window.__coverage__;}, function(err, res){
+      collector.add(res.value);
+
+      reporter.add('lcovonly');
+      reporter.write(collector, false, done);
+    });
+
     client.end();
-    setTimeout(done, 1000);
   });
 });

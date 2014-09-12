@@ -24,6 +24,7 @@
   "devDependencies": {
     "chai": "^1.9.1",
     "express": "^4.9.0",
+    "istanbul": "^0.3.2",
     "mocha": "^1.21.4",
     "webdriverio": "^2.2.1",
     "webdriverjs-selenium-bundle": "0.0.2"

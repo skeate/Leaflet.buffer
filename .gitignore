@@ -2,3 +2,5 @@ node_modules/
 _site
 phantomjsdriver.log
 bower_components
+coverage
+leaflet.buffer-instrumented.js
