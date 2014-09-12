@@ -19,5 +19,10 @@
     "bower_components",
     "test",
     "tests"
-  ]
+  ],
+  "dependencies": {
+    "leaflet": "~0.7.3",
+    "leaflet.draw": "~0.2.3",
+    "jsts": "~0.14.0"
+  }
 }

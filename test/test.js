@@ -20,7 +20,7 @@ describe('Leaflet.buffer', function(){
         }
       });
       client.use(wdjsSeleniumBundle({autostop: true}));
-      client.init().url('http://localhost:8888/examples/index.html', done);
+      client.init().url('http://localhost:8888/test/index.html', done);
     });
   });
 
