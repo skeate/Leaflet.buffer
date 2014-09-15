@@ -23,10 +23,18 @@
   "homepage": "https://github.com/skeate/Leaflet.buffer",
   "devDependencies": {
     "chai": "^1.9.1",
-    "express": "^4.9.0",
-    "istanbul": "^0.3.2",
+    "grunt": "^0.4.5",
+    "grunt-contrib-clean": "^0.6.0",
+    "grunt-contrib-connect": "^0.8.0",
+    "grunt-contrib-cssmin": "^0.10.0",
+    "grunt-contrib-livereload": "^0.1.2",
+    "grunt-contrib-uglify": "^0.5.1",
+    "grunt-contrib-watch": "^0.6.1",
+    "grunt-istanbul": "^0.3.0",
+    "grunt-protractor-coverage": "^0.2.10",
+    "grunt-selenium-webdriver": "^0.2.422",
+    "load-grunt-tasks": "^0.6.0",
     "mocha": "^1.21.4",
-    "webdriverio": "^2.2.1",
-    "webdriverjs-selenium-bundle": "0.0.2"
+    "protractor": "^1.2.0"
   }
 }
