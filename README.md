@@ -1,4 +1,7 @@
 [![Build Status](https://travis-ci.org/skeate/Leaflet.buffer.svg?branch=develop)](https://travis-ci.org/skeate/Leaflet.buffer)
+[![Coverage Status](https://img.shields.io/coveralls/skeate/Leaflet.buffer.svg)](https://coveralls.io/r/skeate/Leaflet.buffer?branch=develop)
+
+[![Sauce Test Status](https://saucelabs.com/browser-matrix/skeate.svg)](https://saucelabs.com/u/skeate)
 
 # Leaflet.buffer
 
