@@ -9,7 +9,7 @@ Create a buffer around shapes drawn with [Leaflet.draw](https://github.com/Leafl
 
 ## Usage
 
-Just include the source (js/css) after Leaflet.draw. It will automatically add itself to the edit menu.
+Include the source (js/css) after Leaflet.draw, and add a `buffer` property to the draw control config.
 
 ## Options
 
