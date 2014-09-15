@@ -3,7 +3,7 @@ env:
     - secure: QXE5W8R9AAL+rchOHIH2Bww8x1BwYF/1rUSH2WjcvLmjIQjVLoss14plD8Y6akj3EILZV6N3gZ8K2DC4nxBbachSCyBjmrHAt/L9bxm6YspuQjVlzWcmr0sohIMAxou0GH+k6zxLLcri0CRTFuUb82PbEIlg6iLWYOL/qclIr0U=
     - secure: UbZm3oUGyAn7NpK9dUpUQj0ftO3kOLUaAg5EK7uF8kxlzt5m9V6wz8RFZlf2WAmMt3dUxYMdnUc13VjTe2vuYXkD1wPHg6OgxM9pgQjpvSr2yKQs2DhrCUkUfNgi47fgSlJZpnE6tiwTf2dC4WaboaH7vQiFYAh74A/iMow86NA=
 before_script:
-  - npm install -g grunt
+  - npm install -g grunt-cli
   - npm install -g bower
   - bower install -f
 language: node_js
