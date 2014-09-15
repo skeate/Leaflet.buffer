@@ -1,0 +1,41 @@
+{
+  "name": "Leaflet.buffer",
+  "version": "0.1.0",
+  "description": "Create a buffer around shapes drawn with [Leaflet.draw](https://github.com/Leaflet/Leaflet.draw).",
+  "main": "index.js",
+  "scripts": {
+    "test": "grunt travis"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/skeate/Leaflet.buffer.git"
+  },
+  "keywords": [
+    "leaflet",
+    "draw",
+    "buffer"
+  ],
+  "author": "Jonathan Skeate",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/skeate/Leaflet.buffer/issues"
+  },
+  "homepage": "https://github.com/skeate/Leaflet.buffer",
+  "devDependencies": {
+    "chai": "^1.9.1",
+    "coveralls": "^2.11.1",
+    "grunt": "^0.4.5",
+    "grunt-contrib-clean": "^0.6.0",
+    "grunt-contrib-connect": "^0.8.0",
+    "grunt-contrib-cssmin": "^0.10.0",
+    "grunt-contrib-livereload": "^0.1.2",
+    "grunt-contrib-uglify": "^0.5.1",
+    "grunt-contrib-watch": "^0.6.1",
+    "grunt-istanbul": "^0.3.0",
+    "grunt-protractor-coverage": "^0.2.10",
+    "grunt-selenium-webdriver": "^0.2.422",
+    "load-grunt-tasks": "^0.6.0",
+    "mocha": "^1.21.4",
+    "protractor": "^1.2.0"
+  }
+}
