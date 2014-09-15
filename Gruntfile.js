@@ -93,12 +93,10 @@ module.exports = function(grunt){
   });
 
   grunt.registerTask('travis', [
-    'selenium_start',
     'instrument',
     'connect:coverage',
     'protractor_coverage:travis',
     'makeReport',
-    'selenium_stop',
     'clean:instrumented'
   ]);
 
