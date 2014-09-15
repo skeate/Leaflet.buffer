@@ -161,14 +161,23 @@
 
     save: function () {
       var bufferedLayers = new L.LayerGroup();
+      var deletedPolylines = new L.LayerGroup();
       this._featureGroup.eachLayer(function (layer) {
+        var opl = this._originalPolylines[L.Util.stamp(layer)];
         if (layer.buffered) {
           bufferedLayers.addLayer(layer);
           layer.buffered = false;
         }
-      });
+        if(opl){
+          this._map.fire('draw:created', {layer: layer});
+          if( this._replace_polyline ){
+            deletedPolylines.addLayer(opl);
+          }
+        }
+      }.bind(this));
       this._originalPolylines = {};
       this._map.fire('draw:buffered', {layers: bufferedLayers});
+      this._map.fire('draw:deleted', {layers: deletedPolylines});
     },
 
     _backupLayer: function (layer) {
@@ -343,7 +352,7 @@
         var metric_unit = radius_km >= 1 ? "km" : "m";
         var metric_value = (radius_km >= 1 ? radius_km : radius_m).toFixed(2);
         var imperial_unit = radius_mi >= 0.1 ? "mi" : "ft";
-        var imperial_value = (radius_mi >= .1 ? radius_mi : radius_ft).toFixed(2);
+        var imperial_value = (radius_mi >= 0.1 ? radius_mi : radius_ft).toFixed(2);
         message  = "Buffer radius: ";
         message += metric_value + metric_unit + " ";
         message += imperial_value + imperial_unit + " ";
