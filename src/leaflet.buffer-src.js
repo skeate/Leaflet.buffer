@@ -88,7 +88,6 @@
 
     _draggingLayer: null,
     _originalLayers: {},
-    _bufferedLayers: {},
     _bufferData: {},
 
     initialize: function (map, options) {
@@ -173,15 +172,15 @@
       var bufferedLayers = new L.LayerGroup();
       var deletedPolylines = new L.LayerGroup();
       this._featureGroup.eachLayer(function (layer) {
-        var opl = this._originalLayers[L.Util.stamp(layer)];
+        var ol = this._originalLayers[L.Util.stamp(layer)];
         if (layer.buffered) {
           bufferedLayers.addLayer(layer);
           layer.buffered = false;
         }
-        if(opl){
+        if(ol){
           this._map.fire('draw:created', {layer: layer});
           if( this._replace_polyline ){
-            deletedPolylines.addLayer(opl);
+            deletedPolylines.addLayer(ol);
           }
         }
       }.bind(this));
@@ -255,14 +254,15 @@
 
     _onLayerDragStart: function(e){
       var layer = e.layer || e.target || e;
-      var layerid = L.Util.stamp(layer);
       var layerIsPolygon = layer instanceof L.Polygon;
+      var layerid = L.Util.stamp(layer);
       if( ( layer instanceof L.Polyline && !layerIsPolygon ) || 
-          ( this._separate_buffer && !(layerid in this._bufferedLayers) ) ){
-        this._originalLayers[layerid] = layer;
+          ( this._separate_buffer && !(layerid in this._originalLayers) ) ){
+
         var newGeo = this._buffer(layer.toGeoJSON(), 0.00001);
         layer = new L.Polygon(newGeo.coordinates[0].map(geoJsonToLatLng));
-        this._bufferedLayers[L.Util.stamp(layer)] = layer;
+        var newLayerId = L.Util.stamp(layer);
+        this._originalLayers[newLayerId] = layer;
         layer.setStyle(this._buffer_style);
         if( this._replace_polyline && !layerIsPolygon ){
           this._featureGroup.removeLayer(temp);
