@@ -90,7 +90,7 @@
         <script src="lib/javascript.util.js"></script>
         <script src="lib/jsts.js"></script>
         <!-- leaflet.buffer -->
-        <script src="lib/leaflet.buffer.js"></script>
+        <script src="lib/leaflet.buffer-src.js"></script>
         <link rel="stylesheet" href="lib/leaflet.buffer.css">
         <script>
           var osmUrl = 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
@@ -140,12 +140,7 @@
 
           map.on('draw:created', function (e) {
             var type = e.layerType,
-            layer = e.layer;
-
-            if (type === 'marker') {
-              layer.bindPopup('A popup!');
-            }
-
+                layer = e.layer;
             drawnItems.addLayer(layer);
           });
         </script>
