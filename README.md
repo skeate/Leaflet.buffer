@@ -7,6 +7,8 @@
 
 Create a buffer around shapes drawn with [Leaflet.draw](https://github.com/Leaflet/Leaflet.draw).
 
+![Demo Image](http://i.imgur.com/FITcpas.gif)
+
 ## Usage
 
 Include the source (js/css) after Leaflet.draw, and add a `buffer` property to the draw control config.
