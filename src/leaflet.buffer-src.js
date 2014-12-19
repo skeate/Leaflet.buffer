@@ -297,6 +297,7 @@
     },
 
     _onLayerDrag: function(e){
+      e.originalEvent.stopPropagation();
       var data = this._bufferData[this._draggingLayerId];
       // this calculates the buffer distance in ~meters
       var distance = ( data.centroid.distanceTo( e.latlng ) - data.orig_distanceToCenter );
