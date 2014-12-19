@@ -8,7 +8,7 @@
  * http://leafletjs.com
  */
 (function (window, document){
-  L.bufferVersion = '0.1.0';
+  L.bufferVersion = '0.1.1';
 
   function geoJsonToLatLng(geoJson){
     return L.latLng(geoJson[1], geoJson[0]);
@@ -42,6 +42,13 @@
     if( options ){
       options.featureGroup = this.options.featureGroup;
       if( !( 'replace_polylines' in options ) ){ options.replace_polylines = true; }
+      if( !( 'buffer_style' in options ) ){
+        options.buffer_style = {
+          fill: true,
+          dashArray: "1, 10"
+        };
+      }
+      if( !( 'separate_buffer' in options ) ){ options.separate_buffer = false; }
     }
     return getModeHandlers.call(this, map).concat([{
       enabled: options,
@@ -80,7 +87,7 @@
     includes: L.Mixin.Events,
 
     _draggingLayer: null,
-    _originalPolylines: {},
+    _originalLayers: {},
     _bufferData: {},
 
     initialize: function (map, options) {
@@ -90,6 +97,8 @@
       // Store the selectable layer group for ease of access
       this._featureGroup = options.featureGroup;
       this._replace_polyline = options.replace_polylines;
+      this._separate_buffer = options.separate_buffer;
+      this._buffer_style = options.buffer_style;
 
       if (!(this._featureGroup instanceof L.FeatureGroup)) {
         throw new Error('options.featureGroup must be a L.FeatureGroup');
@@ -161,14 +170,23 @@
 
     save: function () {
       var bufferedLayers = new L.LayerGroup();
+      var deletedPolylines = new L.LayerGroup();
       this._featureGroup.eachLayer(function (layer) {
+        var ol = this._originalLayers[L.Util.stamp(layer)];
         if (layer.buffered) {
           bufferedLayers.addLayer(layer);
           layer.buffered = false;
         }
-      });
-      this._originalPolylines = {};
+        if(ol){
+          this._map.fire('draw:created', {layer: layer});
+          if( this._replace_polyline ){
+            deletedPolylines.addLayer(ol);
+          }
+        }
+      }.bind(this));
+      this._originalLayers = {};
       this._map.fire('draw:buffered', {layers: bufferedLayers});
+      this._map.fire('draw:deleted', {layers: deletedPolylines});
     },
 
     _backupLayer: function (layer) {
@@ -193,11 +211,11 @@
     _revertLayer: function (layer) {
       var id = L.Util.stamp(layer);
       layer.buffered = false;
-      if( id in this._originalPolylines ){
+      if( id in this._originalLayers ){
         // a polyline that got replaced with a polygon
-        this._featureGroup.addLayer(this._originalPolylines[id]);
+        this._featureGroup.addLayer(this._originalLayers[id]);
         this._featureGroup.removeLayer(layer);
-        delete this._originalPolylines[id];
+        delete this._originalLayers[id];
       }
       else if (this._unbufferedLayerProps.hasOwnProperty(id)) {
         // Polygon or Rectangle
@@ -236,16 +254,17 @@
 
     _onLayerDragStart: function(e){
       var layer = e.layer || e.target || e;
-      if( layer instanceof L.Polyline && !(layer instanceof L.Polygon) ){
-        var temp = layer;
-        var geoReader = new jsts.io.GeoJSONReader(),
-        geoWriter = new jsts.io.GeoJSONWriter();
-        var geometry = geoReader.read(temp.toGeoJSON()).geometry.buffer(0.00001);
-        layer = new L.Polygon(geoWriter.write(geometry).coordinates[0].map(geoJsonToLatLng));
-        layer.options.fill = true;
-        layer.setStyle('fill', true);
-        this._originalPolylines[L.Util.stamp(layer)] = temp;
-        if( this._replace_polyline ){
+      var layerIsPolygon = layer instanceof L.Polygon;
+      var layerid = L.Util.stamp(layer);
+      if( ( layer instanceof L.Polyline && !layerIsPolygon ) || 
+          ( this._separate_buffer && !(layerid in this._originalLayers) ) ){
+
+        var newGeo = this._buffer(layer.toGeoJSON(), 0.00001);
+        layer = new L.Polygon(newGeo.coordinates[0].map(geoJsonToLatLng));
+        var newLayerId = L.Util.stamp(layer);
+        this._originalLayers[newLayerId] = layer;
+        layer.setStyle(this._buffer_style);
+        if( this._replace_polyline && !layerIsPolygon ){
           this._featureGroup.removeLayer(temp);
         }
         this._featureGroup.addLayer(layer);
@@ -291,11 +310,7 @@
         // buffer seems to be based on deg lat, so this converts meter distance to ~degrees
         distance /= 111120;
         data.temp_size = data.size + distance;
-        // based on Daniel Kempkens' code @ https://coderwall.com/p/zb_zdw
-        var geoReader = new jsts.io.GeoJSONReader(),
-        geoWriter = new jsts.io.GeoJSONWriter();
-        var geometry = geoReader.read(data.orig_geoJSON).geometry.buffer(data.temp_size);
-        var newGeometry = geoWriter.write(geometry);
+        var newGeometry = this._buffer(data.orig_geoJSON, data.temp_size);
         if( newGeometry.type !== 'MultiPolygon' ){
           this._draggingLayer.setLatLngs(newGeometry.coordinates[0].map(geoJsonToLatLng));
         }
@@ -343,12 +358,20 @@
         var metric_unit = radius_km >= 1 ? "km" : "m";
         var metric_value = (radius_km >= 1 ? radius_km : radius_m).toFixed(2);
         var imperial_unit = radius_mi >= 0.1 ? "mi" : "ft";
-        var imperial_value = (radius_mi >= .1 ? radius_mi : radius_ft).toFixed(2);
+        var imperial_value = (radius_mi >= 0.1 ? radius_mi : radius_ft).toFixed(2);
         message  = "Buffer radius: ";
         message += metric_value + metric_unit + " ";
         message += imperial_value + imperial_unit + " ";
       }
       this._tooltip.updateContent({text: message});
+    },
+
+    _buffer: function(geoJSON, radius){
+      // based on Daniel Kempkens' code @ https://coderwall.com/p/zb_zdw
+      var geoReader = new jsts.io.GeoJSONReader(),
+      geoWriter = new jsts.io.GeoJSONWriter();
+      var geometry = geoReader.read(geoJSON).geometry.buffer(radius);
+      return geoWriter.write(geometry);
     }
   });
 })(window, document);
