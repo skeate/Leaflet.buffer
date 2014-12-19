@@ -8,7 +8,7 @@
  * http://leafletjs.com
  */
 (function (window, document){
-  L.bufferVersion = '0.1.0';
+  L.bufferVersion = '0.1.1';
 
   function geoJsonToLatLng(geoJson){
     return L.latLng(geoJson[1], geoJson[0]);
