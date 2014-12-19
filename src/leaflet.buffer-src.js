@@ -34,21 +34,29 @@
 
   L.drawLocal.edit.toolbar.buttons.buffer = 'Expand layers.';
   L.drawLocal.edit.toolbar.buttons.bufferDisabled = 'No layers to expand.';
-  L.drawLocal.edit.handlers.buffer = { tooltip: { text:  'Click and drag to expand or contract a shape.' } };
+  L.drawLocal.edit.handlers.buffer = {
+    tooltip: {
+      text:  'Click and drag to expand or contract a shape.'
+    }
+  };
 
   var getModeHandlers = L.EditToolbar.prototype.getModeHandlers;
   L.EditToolbar.prototype.getModeHandlers = function(map){
     var options = this.options.buffer;
     if( options ){
       options.featureGroup = this.options.featureGroup;
-      if( !( 'replace_polylines' in options ) ){ options.replace_polylines = true; }
+      if( !( 'replace_polylines' in options ) ){
+        options.replace_polylines = true;
+      }
       if( !( 'buffer_style' in options ) ){
         options.buffer_style = {
           fill: true,
-          dashArray: "1, 10"
+          dashArray: '1, 10'
         };
       }
-      if( !( 'separate_buffer' in options ) ){ options.separate_buffer = false; }
+      if( !( 'separate_buffer' in options ) ){
+        options.separate_buffer = false;
+      }
     }
     return getModeHandlers.call(this, map).concat([{
       enabled: options,
@@ -58,9 +66,9 @@
   var _checkDisabled = L.EditToolbar.prototype._checkDisabled;
   L.EditToolbar.prototype._checkDisabled = function(){
     _checkDisabled.call(this);
-		var featureGroup = this.options.featureGroup,
-        hasLayers = featureGroup.getLayers().length !== 0,
-        button;
+		var featureGroup = this.options.featureGroup;
+    var hasLayers = featureGroup.getLayers().length !== 0;
+    var button;
 		if (this.options.buffer) {
 			button = this._modes[L.EditToolbar.Buffer.TYPE].button;
 
@@ -106,7 +114,8 @@
 
       this._unbufferedLayerProps = {};
 
-      // Save the type so super can fire, need to do this as cannot do this.TYPE :(
+      // Save the type so super can fire,
+      // need to do this as cannot do this.TYPE :(
       this.type = L.EditToolbar.Buffer.TYPE;
     },
 
@@ -292,7 +301,8 @@
       } 
       var centroid = layer.getCentroid();
       this._bufferData[this._draggingLayerId].centroid = centroid;
-      this._bufferData[this._draggingLayerId].orig_distanceToCenter = e.latlng.distanceTo(this._bufferData[this._draggingLayerId].centroid);
+      this._bufferData[this._draggingLayerId].orig_distanceToCenter =
+        e.latlng.distanceTo(this._bufferData[this._draggingLayerId].centroid);
       this._setTooltip(this._bufferData[this._draggingLayerId].radius);
     },
 
@@ -300,7 +310,8 @@
       e.originalEvent.stopPropagation();
       var data = this._bufferData[this._draggingLayerId];
       // this calculates the buffer distance in ~meters
-      var distance = ( data.centroid.distanceTo( e.latlng ) - data.orig_distanceToCenter );
+      var distance =
+        ( data.centroid.distanceTo( e.latlng ) - data.orig_distanceToCenter );
       data.temp_radius = data.radius + distance;
       this._setTooltip(data.temp_radius);
 
@@ -308,12 +319,15 @@
         this._draggingLayer.setRadius( data.temp_radius );
       }
       else{
-        // buffer seems to be based on deg lat, so this converts meter distance to ~degrees
+        // buffer seems to be based on deg lat,
+        // so this converts meter distance to ~degrees
         distance /= 111120;
         data.temp_size = data.size + distance;
         var newGeometry = this._buffer(data.orig_geoJSON, data.temp_size);
         if( newGeometry.type !== 'MultiPolygon' ){
-          this._draggingLayer.setLatLngs(newGeometry.coordinates[0].map(geoJsonToLatLng));
+          this._draggingLayer.setLatLngs(
+            newGeometry.coordinates[0].map(geoJsonToLatLng)
+          );
         }
         else{
           // todo: handle multipolygons
@@ -332,7 +346,6 @@
       this._setTooltip(L.drawLocal.edit.handlers.buffer.tooltip.text);
     },
 
-
     _onMarkerDragEnd: function (e) {
       var layer = e.target;
       layer.edited = true;
@@ -346,31 +359,31 @@
       return this._featureGroup.getLayers().length !== 0;
     },
     
-    _setTooltip: function(radius_or_message){
+    _setTooltip: function(radiusOrMessage){
       var message;
-      if( typeof radius_or_message === 'string' ){
-        message = radius_or_message;
+      if( typeof radiusOrMessage === 'string' ){
+        message = radiusOrMessage;
       }
       else{
-        var radius_m = radius_or_message;
-        var radius_km = radius_m / 1000;
-        var radius_ft = radius_m * 3.28084;
-        var radius_mi = radius_ft / 5280;
-        var metric_unit = radius_km >= 1 ? "km" : "m";
-        var metric_value = (radius_km >= 1 ? radius_km : radius_m).toFixed(2);
-        var imperial_unit = radius_mi >= 0.1 ? "mi" : "ft";
-        var imperial_value = (radius_mi >= 0.1 ? radius_mi : radius_ft).toFixed(2);
-        message  = "Buffer radius: ";
-        message += metric_value + metric_unit + " ";
-        message += imperial_value + imperial_unit + " ";
+        var radiusM = radiusOrMessage;
+        var radiusKm = radiusM / 1000;
+        var radiusFt = radiusM * 3.28084;
+        var radiusMi = radiusFt / 5280;
+        var metricUnit = radiusKm >= 1 ? 'km' : 'm';
+        var metricValue = (radiusKm >= 1 ? radiusKm : radiusM).toFixed(2);
+        var imperialUnit = radiusMi >= 0.1 ? 'mi' : 'ft';
+        var imperialValue = (radiusMi >= 0.1 ? radiusMi : radiusFt).toFixed(2);
+        message  = 'Buffer radius: ';
+        message += metricValue + metricUnit + ' ';
+        message += imperialValue + imperialUnit + ' ';
       }
       this._tooltip.updateContent({text: message});
     },
 
     _buffer: function(geoJSON, radius){
       // based on Daniel Kempkens' code @ https://coderwall.com/p/zb_zdw
-      var geoReader = new jsts.io.GeoJSONReader(),
-      geoWriter = new jsts.io.GeoJSONWriter();
+      var geoReader = new jsts.io.GeoJSONReader();
+      var geoWriter = new jsts.io.GeoJSONWriter();
       var geometry = geoReader.read(geoJSON).geometry.buffer(radius);
       return geoWriter.write(geometry);
     }
