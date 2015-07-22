@@ -15,8 +15,12 @@
   }
 
   L.Polygon.include({
-    getCentroid: function(){
-      return this.getLatLngs().reduce(function(data, next){
+    getCentroid: function(latlngs){
+      latlngs = latlngs || this.getLatLngs();
+      if (latlngs[0] instanceof Array) {
+        return this.getCentroid(latlngs.map(this.getCentroid));
+      }
+      return latlngs.reduce(function(data, next){
         data.count++;
         data.latSum += next.lat;
         data.lngSum += next.lng;
@@ -66,25 +70,25 @@
   var _checkDisabled = L.EditToolbar.prototype._checkDisabled;
   L.EditToolbar.prototype._checkDisabled = function(){
     _checkDisabled.call(this);
-		var featureGroup = this.options.featureGroup;
+    var featureGroup = this.options.featureGroup;
     var hasLayers = featureGroup.getLayers().length !== 0;
     var button;
-		if (this.options.buffer) {
-			button = this._modes[L.EditToolbar.Buffer.TYPE].button;
+    if (this.options.buffer) {
+      button = this._modes[L.EditToolbar.Buffer.TYPE].button;
 
-			if (hasLayers) {
-				L.DomUtil.removeClass(button, 'leaflet-disabled');
-			} else {
-				L.DomUtil.addClass(button, 'leaflet-disabled');
-			}
+      if (hasLayers) {
+        L.DomUtil.removeClass(button, 'leaflet-disabled');
+      } else {
+        L.DomUtil.addClass(button, 'leaflet-disabled');
+      }
 
-			button.setAttribute(
-				'title',
-				hasLayers ?
-				L.drawLocal.edit.toolbar.buttons.buffer
-				: L.drawLocal.edit.toolbar.buttons.bufferDisabled
-			);
-		}
+      button.setAttribute(
+        'title',
+        hasLayers ?
+        L.drawLocal.edit.toolbar.buttons.buffer
+        : L.drawLocal.edit.toolbar.buttons.bufferDisabled
+      );
+    }
   };
 
   L.EditToolbar.Buffer = L.Handler.extend({
@@ -247,6 +251,7 @@
       if( !(layer instanceof L.Marker) ){
         // Back up this layer (if haven't before)
         this._backupLayer(layer);
+        layer.buffered = true;
         layer.on('mousedown', this._onLayerDragStart, this);
         this._map.on('mouseup', this._onLayerDragEnd, this);
       }

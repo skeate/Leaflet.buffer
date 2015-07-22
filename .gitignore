@@ -4,3 +4,4 @@ phantomjsdriver.log
 bower_components
 coverage
 leaflet.buffer-instrumented.js
+npm-debug.log
