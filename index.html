@@ -7,7 +7,7 @@
 
     <link rel="stylesheet" href="stylesheets/core.css" media="screen">
     <link rel="stylesheet" href="stylesheets/mobile.css" media="handheld, only screen and (max-device-width:640px)">
-    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <link rel="stylesheet" href="stylesheets/github-light.css">
 
     <script type="text/javascript" src="javascripts/modernizr.js"></script>
     <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
@@ -18,19 +18,6 @@
       })
     </script>
     <title>Leaflet.buffer by skeate</title>
-
-    <style>
-      #map img{
-        border: none;
-        box-shadow: none;
-        -webkit-box-shadow: none;
-        -moz-box-shadow: none;
-        max-width: none;
-      }
-      #map li{
-        padding-left: 0;
-      }
-    </style>
   </head>
 
   <body>
@@ -59,91 +46,38 @@
 
 
       <section id="main_content">
-        <h1>
-          <a name="leafletbuffer" class="anchor" href="#leafletbuffer">
-            <span class="octicon octicon-link"></span>
-          </a>
-          Description
-        </h1>
+        <p><a href="https://travis-ci.org/skeate/Leaflet.buffer"><img src="https://travis-ci.org/skeate/Leaflet.buffer.svg?branch=develop" alt="Build Status"></a>
+<a href="https://coveralls.io/r/skeate/Leaflet.buffer?branch=develop"><img src="https://coveralls.io/repos/skeate/Leaflet.buffer/badge.png?branch=develop" alt="Coverage Status"></a><br>
+<a href="https://saucelabs.com/u/skeate"><img src="https://saucelabs.com/browser-matrix/skeate.svg" alt="Sauce Test Status"></a></p>
 
-        <p>
-          Leaflet.buffer is an extension to <a href="https://github.com/Leaflet/Leaflet.draw">Leaflet.draw</a> that allows the user
-          to create a buffer around shapes. 
-        </p>
+<h1>
+<a id="leafletbuffer" class="anchor" href="#leafletbuffer" aria-hidden="true"><span class="octicon octicon-link"></span></a>Leaflet.buffer</h1>
 
-        <h1>
-          <a name="demo" class="anchor" href="#demo">
-            <span class="octicon octicon-link"></span>
-          </a>
-          Demo
-        </h1>
+<p>Create a buffer around shapes drawn with
+<a href="https://github.com/Leaflet/Leaflet.draw">Leaflet.draw</a>.</p>
 
-        <div id="map" style="width: 502px; height: 600px; border: 1px solid #ccc"></div>
+<p><img src="http://i.imgur.com/FITcpas.gif" alt="Demo Image"></p>
 
-        <!-- leaflet -->
-        <script src="lib/leaflet-src.js"></script>
-        <link rel="stylesheet" href="lib/leaflet.css">
-        <!-- leaflet.draw -->
-        <script src="lib/leaflet.draw-src.js"></script>
-        <link rel="stylesheet" href="lib/leaflet.draw.css">
-        <!-- jsts -->
-        <script src="lib/javascript.util.js"></script>
-        <script src="lib/jsts.js"></script>
-        <!-- leaflet.buffer -->
-        <script src="lib/leaflet.buffer-src.js"></script>
-        <link rel="stylesheet" href="lib/leaflet.buffer.css">
-        <script>
-          var osmUrl = 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-          osmAttrib = '&copy; <a href="http://openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-          osm = L.tileLayer(osmUrl, {maxZoom: 18, attribution: osmAttrib}),
-          map = new L.Map('map', {layers: [osm], center: new L.LatLng(38.8977, -77.0366), zoom: 15 });
+<h2>
+<a id="usage" class="anchor" href="#usage" aria-hidden="true"><span class="octicon octicon-link"></span></a>Usage</h2>
 
-          var drawnItems = new L.FeatureGroup();
-          map.addLayer(drawnItems);
+<p>Include the source (js/css) after Leaflet.draw, and add a <code>buffer</code> property to
+the draw control config.</p>
 
-          var drawControl = new L.Control.Draw({
-            position: 'topright',
-            draw: {
-              polyline: {
-                metric: true,
-                shapeOptions: {
-                  color: '#000080'
-                }
-              },
-              polygon: {
-                allowIntersection: false,
-                showArea: true,
-                drawError: {
-                  color: '#b00b00',
-                  timeout: 1000
-                },
-                shapeOptions: {
-                  color: '#3F115B'
-                }
-              },
-              circle: {
-                shapeOptions: {
-                  color: '#208F30'
-                }
-              },
-              marker: false
-            },
-            edit: {
-              featureGroup: drawnItems,
-              remove: true,
-              buffer: {
-                replace_polylines: false
-              }
-            }
-          });
-          map.addControl(drawControl);
+<h2>
+<a id="options" class="anchor" href="#options" aria-hidden="true"><span class="octicon octicon-link"></span></a>Options</h2>
 
-          map.on('draw:created', function (e) {
-            var type = e.layerType,
-                layer = e.layer;
-            drawnItems.addLayer(layer);
-          });
-        </script>
+<p><code>replace_polylines</code>: If <code>true</code> (the default), a polyline will be replaced with
+                     a polygon. If false, the polygon will just sit on top of
+                     the line.</p>
+
+<p><code>separate_buffer</code>: If <code>true</code>, behavior for all shapes will be similar to if
+                   <code>replace_polylines</code> is <code>false</code> -- i.e., the buffer will be
+                   added to the layer instead of resizing the existing shape.</p>
+
+<p><code>buffer_style</code>: <a href="http://leafletjs.com/reference.html#path">style options</a> for
+                the buffer shapes (always used for polyline buffers; used for
+                others iff <code>separate_buffer</code> is <code>true</code>)</p>
       </section>
 
       <footer>
@@ -154,22 +88,22 @@
           <span class="left-tail"></span>
           <span class="right-tail"></span>
         </span>
-        <p>Generated with <a href="http://pages.github.com">GitHub Pages</a> using Merlot</p>
+        <p>Generated with <a href="https://pages.github.com">GitHub Pages</a> using Merlot</p>
         <span class="octocat"></span>
       </footer>
 
     </div>
 
-    <script type="text/javascript">
-      var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
-      document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
-    </script>
-    <script type="text/javascript">
-      try {
-        var pageTracker = _gat._getTracker("UA-54709915-1");
-        pageTracker._trackPageview();
-      } catch(err) {}
-    </script>
+              <script type="text/javascript">
+            var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+            document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+          </script>
+          <script type="text/javascript">
+            try {
+              var pageTracker = _gat._getTracker("UA-54709915-1");
+            pageTracker._trackPageview();
+            } catch(err) {}
+          </script>
 
   </body>
 </html>
