@@ -14,8 +14,15 @@ module.exports = function(grunt){
     uglify: {
       min: {
         files: {
-          './dist/leaflet.buffer.js': ['./src/leaflet.buffer-src.js']
+          './dist/leaflet.buffer.min.js': ['./src/leaflet.buffer-src.js']
         }
+      }
+    },
+    copy: {
+      main: {
+        files: [
+          { src: './src/leaflet.buffer-src.js', dest: './dist/leaflet.buffer.js' }
+        ]
       }
     },
     cssmin: {
@@ -113,6 +120,7 @@ module.exports = function(grunt){
   grunt.registerTask('build', [
     'clean',
     'uglify:min',
+    'copy',
     'cssmin:min',
   ]);
 };
