@@ -21,7 +21,9 @@ module.exports = function(grunt){
     copy: {
       main: {
         files: [
-          { src: './src/leaflet.buffer-src.js', dest: './dist/leaflet.buffer.js' }
+          { src: './src/leaflet.buffer-src.js', dest: './dist/leaflet.buffer.js' },
+          { src: './src/images/spritesheet.png', dest: './dist/images/spritesheet.png' },
+          { src: './src/images/spritesheet-2x.png', dest: './dist/images/spritesheet-2x.png' }
         ]
       }
     },
