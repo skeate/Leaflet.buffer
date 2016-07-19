@@ -5,8 +5,21 @@ module.exports = function(grunt){
   };
   require('load-grunt-tasks')(grunt);
 
+  grunt.loadNpmTasks('grunt-umd');
+
 
   grunt.initConfig({
+    umd: {
+      all: {
+        options: {
+          src: 'src/leaflet.buffer-src.js',
+          dest: 'dist/leaflet.buffer.js', // optional, if missing the src will be used
+          deps: {
+            'default': ['jsts']
+          }
+        }
+      }
+    },
     clean: {
       dist: ['dist'],
       instrumented: ['instrumented']
@@ -122,7 +135,7 @@ module.exports = function(grunt){
   grunt.registerTask('build', [
     'clean',
     'uglify:min',
-    'copy',
+    'umd:all',
     'cssmin:min',
   ]);
 };
