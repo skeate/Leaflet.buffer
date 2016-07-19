@@ -46,25 +46,36 @@
 
   var getModeHandlers = L.EditToolbar.prototype.getModeHandlers;
   L.EditToolbar.prototype.getModeHandlers = function(map){
-    var options = this.options.buffer;
-    if( options ){
-      options.featureGroup = this.options.featureGroup;
-      if( !( 'replace_polylines' in options ) ){
-        options.replace_polylines = true;
-      }
-      if( !( 'buffer_style' in options ) ){
-        options.buffer_style = {
-          fill: true,
-          dashArray: '1, 10'
-        };
-      }
-      if( !( 'separate_buffer' in options ) ){
-        options.separate_buffer = false;
-      }
+    var modeHandlers = getModeHandlers.call(this, map);
+
+    var bufferOptions = this.options.buffer;
+
+    if (!bufferOptions) {
+      return modeHandlers;
     }
-    return getModeHandlers.call(this, map).concat([{
-      enabled: options,
-      handler: new L.EditToolbar.Buffer(map, options)
+
+    if (typeof bufferOptions === 'boolean') {
+      bufferOptions = {};
+    }
+
+    bufferOptions.featureGroup = this.options.featureGroup;
+
+    if( !( 'replace_polylines' in bufferOptions ) ){
+      bufferOptions.replace_polylines = true;
+    }
+    if( !( 'buffer_style' in bufferOptions ) ){
+      bufferOptions.buffer_style = {
+        fill: true,
+        dashArray: '1, 10'
+      };
+    }
+    if( !( 'separate_buffer' in bufferOptions ) ){
+      bufferOptions.separate_buffer = false;
+    }
+
+    return modeHandlers.concat([{
+      enabled: bufferOptions,
+      handler: new L.EditToolbar.Buffer(map, bufferOptions)
     }]);
   };
   var _checkDisabled = L.EditToolbar.prototype._checkDisabled;
@@ -270,7 +281,7 @@
       var layer = e.layer || e.target || e;
       var layerIsPolygon = layer instanceof L.Polygon;
       var layerid = L.Util.stamp(layer);
-      if( ( layer instanceof L.Polyline && !layerIsPolygon ) || 
+      if( ( layer instanceof L.Polyline && !layerIsPolygon ) ||
           ( this._separate_buffer && !(layerid in this._originalLayers) ) ){
 
         var newGeo = this._buffer(layer.toGeoJSON(), 0.00001);
@@ -279,7 +290,7 @@
         this._originalLayers[newLayerId] = layer;
         layer.setStyle(this._buffer_style);
         if( this._replace_polyline && !layerIsPolygon ){
-          this._featureGroup.removeLayer(temp);
+          this._featureGroup.removeLayer(layer);
         }
         this._featureGroup.addLayer(layer);
       }
@@ -303,7 +314,7 @@
             orig_geoJSON: layer.toGeoJSON()
           };
         }
-      } 
+      }
       var centroid = layer.getCentroid();
       this._bufferData[this._draggingLayerId].centroid = centroid;
       this._bufferData[this._draggingLayerId].orig_distanceToCenter =
@@ -363,7 +374,7 @@
     _hasAvailableLayers: function () {
       return this._featureGroup.getLayers().length !== 0;
     },
-    
+
     _setTooltip: function(radiusOrMessage){
       var message;
       if( typeof radiusOrMessage === 'string' ){
