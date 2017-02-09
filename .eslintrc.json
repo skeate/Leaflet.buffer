@@ -1,0 +1,26 @@
+{
+  "extends": "airbnb",
+  "parser": "babel-eslint",
+  "parserOptions": {
+    "ecmaVersion": 2016,
+    "sourceType": "module",
+    "ecmaFeatures": {
+      "jsx": true
+    }
+  },
+  "rules": {
+    "arrow-parens": ["error", "always"],
+    "key-spacing": ["error", {"mode": "minimum"}],
+    "comma-dangle": ["error", {
+      "arrays":    "always-multiline",
+      "exports":   "always-multiline",
+      "functions": "ignore",
+      "imports":   "always-multiline",
+      "objects":   "always-multiline"
+    }],
+    "no-underscore-dangle": "off"
+  },
+  "settings": {
+    "import/resolver": "webpack"
+  }
+}
