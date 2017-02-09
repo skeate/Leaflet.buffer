@@ -36,12 +36,17 @@ module.exports = {
   },
 
   plugins: [
-    new webpack.SourceMapDevToolPlugin({}),
+    new webpack.NormalModuleReplacementPlugin(
+      /node_modules\/jsts\/src\/java\/lang\/System\.js/,
+      '../../../../../src/system-replacement.js'
+    ),
     new webpack.optimize.CommonsChunkPlugin({
       filename: 'commons.js',
       name: 'commons',
     }),
   ],
+
+  devtool: 'eval-source-map',
 
   devServer: {
     inline: true,

@@ -10,9 +10,10 @@
 
 /* global L */
 
-// import * as jsts from 'jsts';
 import GeoJSONReader from 'jsts/src/org/locationtech/jts/io/GeoJSONReader';
 import GeoJSONWriter from 'jsts/src/org/locationtech/jts/io/GeoJSONWriter';
+import './jsts-monkey';
+
 require('./leaflet.buffer.css');
 
 L.bufferVersion = '0.2.0';
@@ -63,18 +64,18 @@ L.EditToolbar.prototype.getModeHandlers = function getModeHandlersExt(map) {
 
   bufferOptions.featureGroup = this.options.featureGroup;
 
-  if (!('replace_polylines' in bufferOptions)) {
-    bufferOptions.replace_polylines = true;
+  if (!('replacePolylines' in bufferOptions)) {
+    bufferOptions.replacePolylines = true;
   }
 
-  if (!('buffer_style' in bufferOptions)) {
-    bufferOptions.buffer_style = {
+  if (!('bufferStyle' in bufferOptions)) {
+    bufferOptions.bufferStyle = {
       dashArray: '1, 10',
       fill:      true,
     };
   }
-  if (!('separate_buffer' in bufferOptions)) {
-    bufferOptions.separate_buffer = false;
+  if (!('separateBuffer' in bufferOptions)) {
+    bufferOptions.separateBuffer = false;
   }
 
   return modeHandlers.concat([{
@@ -121,9 +122,9 @@ L.EditToolbar.Buffer = L.Handler.extend({
     this::L.Handler.prototype.initialize(map);
     // Store the selectable layer group for ease of access
     this._featureGroup = options.featureGroup;
-    this._replace_polyline = options.replace_polylines;
-    this._separate_buffer = options.separate_buffer;
-    this._buffer_style = options.buffer_style;
+    this._replacePolyline = options.replacePolylines;
+    this._separateBuffer = options.separateBuffer;
+    this._bufferStyle = options.bufferStyle;
 
     if (!(this._featureGroup instanceof L.FeatureGroup)) {
       throw new Error('options.featureGroup must be a L.FeatureGroup');
@@ -218,7 +219,7 @@ L.EditToolbar.Buffer = L.Handler.extend({
       }
       if (ol) {
         this._map.fire('draw:created', { layer });
-        if (this._replace_polyline) {
+        if (this._replacePolyline) {
           deletedPolylines.addLayer(ol);
         }
       }
@@ -294,13 +295,13 @@ L.EditToolbar.Buffer = L.Handler.extend({
     const layerIsPolygon = layer instanceof L.Polygon;
     const layerid = L.Util.stamp(layer);
     if ((layer instanceof L.Polyline && !layerIsPolygon) ||
-      (this._separate_buffer && !(layerid in this._originalLayers))) {
+      (this._separateBuffer && !(layerid in this._originalLayers))) {
       const newGeo = this._buffer(layer.toGeoJSON(), 0.00001);
       layer = new L.Polygon(newGeo.coordinates[0].map(geoJsonToLatLng));
       const newLayerId = L.Util.stamp(layer);
       this._originalLayers[newLayerId] = layer;
-      layer.setStyle(this._buffer_style);
-      if (this._replace_polyline && !layerIsPolygon) {
+      layer.setStyle(this._bufferStyle);
+      if (this._replacePolyline && !layerIsPolygon) {
         this._featureGroup.removeLayer(layer);
       }
       this._featureGroup.addLayer(layer);
