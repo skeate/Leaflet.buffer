@@ -1,3 +1,5 @@
+before_script:
+  - npm run build
 language: node_js
 node_js:
-  - '7.0'
+  - 7
