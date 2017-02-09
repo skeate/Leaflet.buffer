@@ -6,7 +6,7 @@
   "scripts": {
     "start": "webpack-dev-server",
     "build": "webpack --config webpack.prod.config.js",
-    "test": "grunt travis"
+    "test": "mocha test/*.spec.js"
   },
   "repository": {
     "type": "git",
@@ -32,7 +32,6 @@
     "babel-preset-stage-0": "^6.22.0",
     "babel-preset-stage-1": "^6.22.0",
     "chai": "^1.9.1",
-    "coveralls": "^2.11.1",
     "css-loader": "^0.26.1",
     "eslint": "^3.15.0",
     "eslint-config-airbnb": "^14.1.0",
@@ -42,10 +41,10 @@
     "eslint-plugin-jsx-a11y": "^4.0.0",
     "eslint-plugin-react": "^6.9.0",
     "file-loader": "^0.10.0",
+    "jsdom": "^9.10.0",
     "leaflet": "^1.0.3",
     "leaflet-draw": "^0.4.9",
     "mocha": "^1.21.4",
-    "protractor": "^1.2.0",
     "style-loader": "^0.13.1",
     "url-loader": "^0.5.7",
     "webpack": "^2.2.1",
