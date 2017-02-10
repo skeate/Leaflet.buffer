@@ -1,6 +1,4 @@
-[![Build Status](https://travis-ci.org/skeate/Leaflet.buffer.svg?branch=develop)](https://travis-ci.org/skeate/Leaflet.buffer)
-[![Coverage Status](https://coveralls.io/repos/skeate/Leaflet.buffer/badge.png?branch=develop)](https://coveralls.io/r/skeate/Leaflet.buffer?branch=develop)  
-[![Sauce Test Status](https://saucelabs.com/browser-matrix/skeate.svg)](https://saucelabs.com/u/skeate)
+[![Build Status](https://travis-ci.org/skeate/Leaflet.buffer.svg)](https://travis-ci.org/skeate/Leaflet.buffer)
 
 # Leaflet.buffer
 
@@ -9,21 +7,52 @@ Create a buffer around shapes drawn with
 
 ![Demo Image](http://i.imgur.com/FITcpas.gif)
 
+[See here](http://skeate.github.io/Leaflet.buffer) for a live demo.
+
 ## Usage
 
-Include the source (js/css) after Leaflet.draw, and add a `buffer` property to
-the draw control config.
+Include the source file (dist/leaflet.buffer.min.js) after the Leaflet.Draw
+library. In your setup script, make sure your Leaflet.Draw `edit` config
+includes a `buffer` property (options are below). That's it!
+
+Example:
+
+```javascript
+const osmUrl = 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+const osm = L.tileLayer(osmUrl, { maxZoom: 18 });
+const map = new L.Map('map', {
+  layers: [osm],
+  center: new L.LatLng(38.8977, -77.0366),
+  zoom: 15,
+});
+const drawnItems = new L.FeatureGroup();
+map.addLayer(drawnItems);
+
+const drawControl = new L.Control.Draw({
+  position: 'topright',
+  draw: {},
+  edit: {
+    featureGroup: drawnItems,
+    remove: true,
+    buffer: {
+      replacePolylines: false,
+      separateBuffer: false,
+    },
+  },
+});
+map.addControl(drawControl);
+```
 
 ## Options
 
-`replace_polylines`: If `true` (the default), a polyline will be replaced with
-                     a polygon. If false, the polygon will just sit on top of
-                     the line.
+`replacePolylines`: If `true` (default), buffering a polyline will result in the
+replacement of the polyline with a polygon. If `false`, buffering a polyline
+will result in a new polygon on top of the line, but not replacing it.
 
-`separate_buffer`: If `true`, behavior for all shapes will be similar to if
-                   `replace_polylines` is `false` -- i.e., the buffer will be
-                   added to the layer instead of resizing the existing shape.
+`separateBuffer`: If `false` (default), then buffering any shape actually
+changes the shape. If `true`, buffering a shape results in a copy of the shape
+being made, to maintain both the original shape and the buffer.
 
-`buffer_style`: [style options](http://leafletjs.com/reference.html#path) for
-                the buffer shapes (always used for polyline buffers; used for
-                others iff `separate_buffer` is `true`)
+`bufferStyle`: [style options](http://leafletjs.com/reference.html#path) for
+the buffer shapes (always used for polyline buffers; used for others iff
+`separateBuffer` is `true`)
