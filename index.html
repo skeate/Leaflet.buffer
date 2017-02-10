@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
   <head>
     <meta charset='utf-8'>
     <meta http-equiv="X-UA-Compatible" content="chrome=1">
@@ -13,11 +14,22 @@
     <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
     <script type="text/javascript" src="javascripts/headsmart.min.js"></script>
     <script type="text/javascript">
-      $(document).ready(function () {
+      $(document).ready(function() {
         $('#main_content').headsmart()
       })
     </script>
     <title>Leaflet.buffer by skeate</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.0.3/leaflet.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/0.4.9/leaflet.draw.css">
+    <style>
+      #map {
+        width: 100%;
+        height: 500px;
+      }
+      .leaflet-draw-actions li {
+        padding-left: 0;
+      }
+    </style>
   </head>
 
   <body>
@@ -46,38 +58,19 @@
 
 
       <section id="main_content">
-        <p><a href="https://travis-ci.org/skeate/Leaflet.buffer"><img src="https://travis-ci.org/skeate/Leaflet.buffer.svg?branch=develop" alt="Build Status"></a>
-<a href="https://coveralls.io/r/skeate/Leaflet.buffer?branch=develop"><img src="https://coveralls.io/repos/skeate/Leaflet.buffer/badge.png?branch=develop" alt="Coverage Status"></a><br>
-<a href="https://saucelabs.com/u/skeate"><img src="https://saucelabs.com/browser-matrix/skeate.svg" alt="Sauce Test Status"></a></p>
+        <p>
+          <a href="https://travis-ci.org/skeate/Leaflet.buffer"><img src="https://travis-ci.org/skeate/Leaflet.buffer.svg?branch=develop" alt="Build Status"></a>
+        </p>
 
-<h1>
-<a id="leafletbuffer" class="anchor" href="#leafletbuffer" aria-hidden="true"><span class="octicon octicon-link"></span></a>Leaflet.buffer</h1>
+        <h1>
+          <a id="leafletbuffer" class="anchor" href="#leafletbuffer" aria-hidden="true">
+            <span class="octicon octicon-link"></span>
+          </a>
+          Leaflet.buffer
+        </h1>
 
-<p>Create a buffer around shapes drawn with
-<a href="https://github.com/Leaflet/Leaflet.draw">Leaflet.draw</a>.</p>
+        <div id="map"></div>
 
-<p><img src="http://i.imgur.com/FITcpas.gif" alt="Demo Image"></p>
-
-<h2>
-<a id="usage" class="anchor" href="#usage" aria-hidden="true"><span class="octicon octicon-link"></span></a>Usage</h2>
-
-<p>Include the source (js/css) after Leaflet.draw, and add a <code>buffer</code> property to
-the draw control config.</p>
-
-<h2>
-<a id="options" class="anchor" href="#options" aria-hidden="true"><span class="octicon octicon-link"></span></a>Options</h2>
-
-<p><code>replace_polylines</code>: If <code>true</code> (the default), a polyline will be replaced with
-                     a polygon. If false, the polygon will just sit on top of
-                     the line.</p>
-
-<p><code>separate_buffer</code>: If <code>true</code>, behavior for all shapes will be similar to if
-                   <code>replace_polylines</code> is <code>false</code> -- i.e., the buffer will be
-                   added to the layer instead of resizing the existing shape.</p>
-
-<p><code>buffer_style</code>: <a href="http://leafletjs.com/reference.html#path">style options</a> for
-                the buffer shapes (always used for polyline buffers; used for
-                others iff <code>separate_buffer</code> is <code>true</code>)</p>
       </section>
 
       <footer>
@@ -94,16 +87,22 @@ the draw control config.</p>
 
     </div>
 
-              <script type="text/javascript">
-            var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
-            document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
-          </script>
-          <script type="text/javascript">
-            try {
-              var pageTracker = _gat._getTracker("UA-54709915-1");
-            pageTracker._trackPageview();
-            } catch(err) {}
-          </script>
+    <script>
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+        (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+          m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-54709915-1', 'auto');
+ga('send', 'pageview');
+
+    </script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.0.3/leaflet.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/0.4.9/leaflet.draw.js"></script>
+    <script src="leaflet.buffer.min.js"></script>
+    <script src="demo.js"></script>
 
   </body>
+
 </html>

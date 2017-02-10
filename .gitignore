@@ -1,2 +1,6 @@
 _site
 phantomjsdriver.log
+node_modules
+.tern-port
+dist
+example
