@@ -3,7 +3,7 @@ const path = require('path');
 
 module.exports = {
   entry: {
-    example: './example/index.js',
+    example: './example/example.js',
     'leaflet.buffer': './src/leaflet.buffer.js',
   },
 

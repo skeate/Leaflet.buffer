@@ -6,6 +6,5 @@ bower_components
 coverage
 leaflet.buffer-instrumented.js
 npm-debug.log
-dist
-example
 .tern-port
+*.tgz
