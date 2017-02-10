@@ -1,8 +1,7 @@
 [![Build Status](https://travis-ci.org/skeate/Leaflet.buffer.svg)](https://travis-ci.org/skeate/Leaflet.buffer)
+[![Greenkeeper badge](https://badges.greenkeeper.io/skeate/Leaflet.buffer.svg)](https://greenkeeper.io/)
 
 # Leaflet.buffer
-
-[![Greenkeeper badge](https://badges.greenkeeper.io/skeate/Leaflet.buffer.svg)](https://greenkeeper.io/)
 
 Create a buffer around shapes drawn with
 [Leaflet.draw](https://github.com/Leaflet/Leaflet.draw).
