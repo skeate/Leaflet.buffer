@@ -296,8 +296,12 @@ L.EditToolbar.Buffer = L.Handler.extend({
     const layerid = L.Util.stamp(layer);
     if ((layer instanceof L.Polyline && !layerIsPolygon) ||
       (this._separateBuffer && !(layerid in this._originalLayers))) {
-      const newGeo = this._buffer(layer.toGeoJSON(), 0.00001);
-      layer = new L.Polygon(newGeo.coordinates[0].map(geoJsonToLatLng));
+      if (layer instanceof L.Circle) {
+        layer = new L.Circle(layer.getLatLng(), { radius: layer.getRadius() });
+      } else {
+        const newGeo = this._buffer(layer.toGeoJSON(), 0.00001);
+        layer = new L.Polygon(newGeo.coordinates[0].map(geoJsonToLatLng));
+      }
       const newLayerId = L.Util.stamp(layer);
       this._originalLayers[newLayerId] = layer;
       layer.setStyle(this._bufferStyle);

@@ -47,7 +47,7 @@ const drawControl = new L.Control.Draw({
     remove: true,
     buffer: {
       replacePolylines: false,
-      separateBuffer: false,
+      separateBuffer: true,
     },
   },
 });
