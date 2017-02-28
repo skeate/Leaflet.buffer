@@ -1,0 +1,21 @@
+---
+engines:
+  eslint:
+    enabled: true
+  fixme:
+    enabled: true
+  duplication:
+    enabled: true
+    config:
+      languages:
+        javascript:
+ratings:
+  paths:
+  - "**.js"
+exclude_paths:
+- "test/**/*"
+- ".codeclimate.yml"
+- "dist/**/*"
+- "webpack.config.js"
+- "webpack.prod.config.js"
+- "example/**/*"
