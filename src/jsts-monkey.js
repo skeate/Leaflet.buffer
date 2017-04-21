@@ -5,9 +5,9 @@
  * provide the `buffer` method.
  */
 
-import BufferOp from 'jsts/src/org/locationtech/jts/operation/buffer/BufferOp';
-import Geometry from 'jsts/src/org/locationtech/jts/geom/Geometry';
-import extend from 'jsts/src/extend';
+import BufferOp from 'jsts/org/locationtech/jts/operation/buffer/BufferOp';
+import Geometry from 'jsts/org/locationtech/jts/geom/Geometry';
+import extend from 'jsts/extend';
 
 extend(Geometry.prototype, {
   buffer(distance) {

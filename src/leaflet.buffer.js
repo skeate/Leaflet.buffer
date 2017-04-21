@@ -10,8 +10,8 @@
 
 /* global L */
 
-import GeoJSONReader from 'jsts/src/org/locationtech/jts/io/GeoJSONReader';
-import GeoJSONWriter from 'jsts/src/org/locationtech/jts/io/GeoJSONWriter';
+import GeoJSONReader from 'jsts/org/locationtech/jts/io/GeoJSONReader';
+import GeoJSONWriter from 'jsts/org/locationtech/jts/io/GeoJSONWriter';
 import './jsts-monkey';
 
 require('./leaflet.buffer.css');
