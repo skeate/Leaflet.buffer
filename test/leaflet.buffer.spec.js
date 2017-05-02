@@ -2,7 +2,7 @@
 
 // import { expect } from 'chai';
 const expect = require('chai').expect;
-const jsdom = require('jsdom');
+const jsdom = require('jsdom/lib/old-api');
 const path = require('path');
 
 const className = 'leaflet-draw-edit-buffer';
