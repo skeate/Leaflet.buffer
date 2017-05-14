@@ -44,7 +44,7 @@
     "jsdom": "^10.1.0",
     "leaflet": "^1.0.3",
     "leaflet-draw": "^0.4.9",
-    "mocha": "^3.2.0",
+    "mocha": "^3.4.0",
     "style-loader": "^0.17.0",
     "url-loader": "^0.5.7",
     "webpack": "^2.2.1",
