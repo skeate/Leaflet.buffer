@@ -16,7 +16,7 @@ import './jsts-monkey';
 
 require('./leaflet.buffer.css');
 
-L.bufferVersion = '0.2.0';
+L.bufferVersion = '0.3.0';
 
 function geoJsonToLatLng(geoJson) {
   return L.latLng(geoJson[1], geoJson[0]);
@@ -102,8 +102,8 @@ L.EditToolbar.prototype._checkDisabled = function checkDisabled() {
     button.setAttribute(
       'title',
       hasLayers ?
-      L.drawLocal.edit.toolbar.buttons.buffer
-      : L.drawLocal.edit.toolbar.buttons.bufferDisabled
+        L.drawLocal.edit.toolbar.buttons.buffer
+        : L.drawLocal.edit.toolbar.buttons.bufferDisabled
     );
   }
 };
