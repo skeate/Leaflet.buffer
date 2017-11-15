@@ -2,7 +2,7 @@
   "name": "leaflet-buffer",
   "version": "0.3.0",
   "description": "Create a buffer around shapes drawn with [Leaflet.draw](https://github.com/Leaflet/Leaflet.draw).",
-  "main": "index.js",
+  "main": "dist/leaflet.buffer.min.js",
   "scripts": {
     "start": "webpack-dev-server",
     "build": "webpack --config webpack.prod.config.js",
