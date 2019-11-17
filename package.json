@@ -41,7 +41,7 @@
     "eslint-plugin-react": "^7.0.0",
     "file-loader": "^1.0.0-rc.0",
     "jsdom": "^11.0.0",
-    "leaflet": "1.0.3",
+    "leaflet": "1.6.0",
     "leaflet-draw": "^0.4.9",
     "mocha": "^3.2.0",
     "style-loader": "^0.18.0",
