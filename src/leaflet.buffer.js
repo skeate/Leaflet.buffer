@@ -113,7 +113,7 @@ L.EditToolbar.Buffer = L.Handler.extend({
     TYPE: 'buffer',
   },
 
-  includes:        L.Mixin.Events,
+  includes:        L.Evented ? L.Evented.prototype : L.Mixin.Events,
   _draggingLayer:  null,
   _originalLayers: {},
   _bufferData:     {},
